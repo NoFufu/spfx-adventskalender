@@ -1,0 +1,23 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "whichFolder": "subdir",
+    "solutionName": "spfx-adventskalender",
+    "environment": "spo",
+    "packageManager": "npm",
+    "skipFeatureDeployment": true,
+    "useGulp": false,
+    "componentType": "webpart",
+    "template": "react",
+    "componentName": "Adventskalender",
+    "componentDescription": "Adventskalender mit 24 Türchen",
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "22.22.0",
+    "sdksVersions": {},
+    "version": "1.23.2",
+    "libraryName": "spfx-adventskalender",
+    "libraryId": "1130696c-94f8-4c83-b978-0ce934151719",
+    "solutionShortDescription": "spfx-adventskalender description",
+    "isDomainIsolated": false
+  }
+}

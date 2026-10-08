@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "spfx-adventskalender-client-side-solution",
+    "id": "1130696c-94f8-4c83-b978-0ce934151719",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.23.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "spfx-adventskalender description"
+      },
+      "longDescription": {
+        "default": "spfx-adventskalender description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "spfx-adventskalender Feature",
+        "description": "The feature that activates elements of the spfx-adventskalender solution.",
+        "id": "93e664b1-b429-445e-87ea-ea9ee5400f1a",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/spfx-adventskalender.sppkg"
+  }
+}
