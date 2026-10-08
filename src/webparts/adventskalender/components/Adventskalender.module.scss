@@ -69,6 +69,17 @@ $serif: Georgia, 'Times New Roman', serif;
   white-space: nowrap;
 }
 
+.redaktionsHinweis {
+  position: relative;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border: 1px solid rgba($gold, 0.5);
+  border-radius: 10px;
+  background: rgba($gold, 0.08);
+  color: $creme;
+  font-size: 0.9rem;
+}
+
 .raster {
   position: relative;
   display: grid;

@@ -7,6 +7,14 @@ declare interface IAdventskalenderWebPartStrings {
   JahrFieldError: string;
   GemischtFieldLabel: string;
   VorschauFieldLabel: string;
+  InhalteGroupName: string;
+  ListenNameFieldLabel: string;
+  ListenNameFieldDescription: string;
+  ListeAnlegenButton: string;
+  ListeAnlegenHinweis: string;
+  ListeWirdAngelegt: string;
+  ListeAngelegt: string;
+  ListeVollstaendig: string;
 }
 
 declare module 'AdventskalenderWebPartStrings' {

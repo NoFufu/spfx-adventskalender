@@ -26,7 +26,8 @@
       "titel": "Adventskalender",
       "jahr": "",
       "gemischt": true,
-      "vorschau": false
+      "vorschau": false,
+      "listenName": "Adventskalender"
     }
   }]
 }

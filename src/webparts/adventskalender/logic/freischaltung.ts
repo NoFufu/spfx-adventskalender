@@ -52,6 +52,15 @@ export function mischen<T>(liste: T[], startwert: number): T[] {
   return ergebnis;
 }
 
+/** Höchster Tag, der zum Zeitpunkt "jetzt" offen ist (0 = noch keiner, 24 = alle). */
+export function hoechsterOffenerTag(jahr: number, jetzt: Date): number {
+  let tag: number = 0;
+  while (tag < ANZAHL_TUERCHEN && istOffen(tag + 1, jahr, jetzt)) {
+    tag++;
+  }
+  return tag;
+}
+
 /** Kurzer Hinweis unter der Überschrift, z. B. "Noch 5 Tage bis Heiligabend". */
 export function adventsHinweis(jahr: number, jetzt: Date): string {
   if (!istOffen(1, jahr, jetzt)) {

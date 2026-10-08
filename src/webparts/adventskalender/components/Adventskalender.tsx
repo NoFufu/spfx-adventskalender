@@ -53,10 +53,34 @@ function speichereGeoeffnete(schluessel: string, tage: number[]): void {
 }
 
 export default function Adventskalender(props: IAdventskalenderProps): React.ReactElement<IAdventskalenderProps> {
-  const { titel, jahr, gemischt, vorschau, inhalte, speicherSchluessel } = props;
+  const { titel, jahr, gemischt, vorschau, speicherSchluessel, ladeInhalte, ladeSchluessel, bearbeitungsModus } = props;
   const jetzt: Date = props.jetzt ?? new Date();
   const [offenerTag, setOffenerTag] = React.useState<number | undefined>(undefined);
   const [geoeffnete, setGeoeffnete] = React.useState<number[]>(() => ladeGeoeffnete(speicherSchluessel));
+
+  const [inhalte, setInhalte] = React.useState<ITuerchenInhalt[]>([]);
+  const [fehler, setFehler] = React.useState<string | undefined>(undefined);
+
+  React.useEffect(() => {
+    let aktuell: boolean = true;
+    ladeInhalte().then(
+      geladen => {
+        if (aktuell) {
+          setInhalte(geladen);
+          setFehler(undefined);
+        }
+      },
+      (grund: Error) => {
+        if (aktuell) {
+          setInhalte([]);
+          setFehler(grund.message);
+        }
+      }
+    );
+    return () => {
+      aktuell = false;
+    };
+  }, [ladeSchluessel]);
 
   const plaetze: IBelegterPlatz[] = React.useMemo(() => belegePlaetze(jahr, gemischt), [jahr, gemischt]);
   const heutigerTag: number =
@@ -83,6 +107,11 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
         </div>
         {vorschau && <span className={styles.vorschauHinweis}>Vorschau: alle Türchen offen</span>}
       </header>
+      {bearbeitungsModus && fehler && (
+        <p className={styles.redaktionsHinweis}>
+          {fehler} In den Webpart-Einstellungen kannst du sie mit „Liste anlegen“ erstellen.
+        </p>
+      )}
       <div className={styles.raster}>
         {plaetze.map(platz => (
           <Tuerchen
@@ -110,7 +139,7 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
         maxWidth={640}
       >
         {inhalt?.bildUrl && <img className={styles.bild} src={inhalt.bildUrl} alt="" />}
-        <p className={styles.text}>{inhalt?.text ?? 'Für diesen Tag gibt es noch keinen Inhalt.'}</p>
+        <p className={styles.text}>{inhalt?.text || 'Für diesen Tag gibt es noch keinen Inhalt.'}</p>
         {inhalt?.linkUrl && (
           <Link className={styles.link} href={inhalt.linkUrl} target="_blank" rel="noreferrer">
             Mehr dazu

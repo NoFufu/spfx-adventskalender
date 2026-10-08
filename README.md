@@ -10,12 +10,27 @@ npm run build   # Tests, Lint, Produktions-Bundle und sharepoint/solution/spfx-a
 npm run start   # lokale Entwicklung gegen die gehostete Workbench (config/serve.json: Tenant eintragen)
 ```
 
-## Stand
+## Inhalte pflegen
 
-Schritt 1 aus dem Plan: Raster mit 24 Türchen, Freischaltlogik mit Tests (`src/webparts/adventskalender/logic/`), Beispielinhalte.
-Die Anbindung an die SharePoint-Liste "Adventskalender" folgt in Schritt 2.
+Die Türchen lesen ihre Inhalte aus einer SharePoint-Liste auf derselben Website (Standardname "Adventskalender").
 
-Webpart-Einstellungen: Überschrift, Jahr (leer = aktuelles Jahr), gemischte Anordnung, Vorschau (alle Türchen offen, nur zum Testen).
+1. Seite bearbeiten, Webpart-Einstellungen öffnen, unter "Inhalte" auf **Liste anlegen** klicken.
+   Das legt die Liste mit allen Spalten an und erzeugt 24 leere Zeilen für das eingestellte Jahr.
+2. In der Liste pro Zeile ausfüllen: **Titel**, **Text**, optional **Bild** (Adresse eines Bildes, z. B. aus der Websiteobjekte-Bibliothek) und **Link**.
+3. Speichern. Änderungen erscheinen beim nächsten Laden der Seite, ohne neues Paket.
+
+| Spalte | Typ | Bedeutung |
+| --- | --- | --- |
+| Titel | Text | Überschrift im Türchen-Dialog |
+| Tag | Zahl 1–24 | Welches Türchen |
+| Jahr | Zahl | Für welches Jahr (so bleiben Vorjahre erhalten) |
+| Text | Mehrzeiliger Text | Inhalt hinter dem Türchen |
+| Bild | Link (Bild) | Optionales Bild oben im Dialog |
+| Link | Link | Optionaler Link "Mehr dazu" |
+
+Das Webpart fragt nur Zeilen ab, deren Tag schon offen ist. Wer die Liste direkt öffnet, sieht alle Zeilen; wer das verhindern will, muss die Berechtigungen der Liste einschränken.
+
+Webpart-Einstellungen: Überschrift, Jahr (leer = aktuelles Jahr), gemischte Anordnung, Vorschau (alle Türchen offen, nur zum Testen), Name der Liste.
 
 ## Auslieferung
 

@@ -1,6 +1,7 @@
 import {
   ANZAHL_TUERCHEN,
   adventsHinweis,
+  hoechsterOffenerTag,
   istOffen,
   mischen,
   tageBisOffen
@@ -69,5 +70,13 @@ describe('adventsHinweis', () => {
 
   it('wünscht ab dem 24. frohe Weihnachten', () => {
     expect(adventsHinweis(2026, new Date(2026, 11, 24))).toBe('Frohe Weihnachten!');
+  });
+});
+
+describe('hoechsterOffenerTag', () => {
+  it('liefert 0 vor Dezember, den Tag im Dezember und 24 danach', () => {
+    expect(hoechsterOffenerTag(2026, new Date(2026, 10, 30, 23))).toBe(0);
+    expect(hoechsterOffenerTag(2026, new Date(2026, 11, 10, 8))).toBe(10);
+    expect(hoechsterOffenerTag(2026, new Date(2027, 0, 5))).toBe(24);
   });
 });
