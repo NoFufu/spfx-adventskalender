@@ -190,7 +190,7 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
           </div>
         </div>
       </header>
-      {bearbeitungsModus && fehler && (
+      {(bearbeitungsModus || vorschau) && fehler && (
         <p className={styles.redaktionsHinweis}>
           {fehler} In den Webpart-Einstellungen kannst du sie mit „Liste anlegen“ erstellen.
         </p>
@@ -228,7 +228,11 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
         maxWidth={640}
       >
         {inhalt?.bildUrl && <img className={styles.bild} src={inhalt.bildUrl} alt="" />}
-        <p className={styles.text}>{inhalt?.text || 'Für diesen Tag gibt es noch keinen Inhalt.'}</p>
+        <p className={styles.text}>
+          {inhalt?.text || (fehler && (bearbeitungsModus || vorschau)
+            ? `Die Inhalte konnten nicht geladen werden: ${fehler}`
+            : 'Für diesen Tag gibt es noch keinen Inhalt.')}
+        </p>
         {inhalt?.linkUrl && (
           <Link className={styles.link} style={{ color: farben.titel }} href={inhalt.linkUrl} target="_blank" rel="noreferrer">
             Mehr dazu

@@ -3,7 +3,7 @@ import { ITuerchenInhalt } from './ITuerchenInhalt';
 import { ANZAHL_TUERCHEN } from './freischaltung';
 import { IListenZeile, zeileZuInhalt } from './listenZeile';
 import { BEISPIELE } from './beispielDaten';
-import { listenPfad, listeSicherstellen, sende, spaltenSicherstellen } from './spHilfe';
+import { fehlermeldung, listenPfad, listeSicherstellen, sende, spaltenSicherstellen } from './spHilfe';
 
 // Zugriff auf die SharePoint-Liste mit den Türchen-Inhalten (eine Zeile pro Tag und Jahr).
 //
@@ -40,7 +40,7 @@ export class AdventskalenderListe {
       SPHttpClient.configurations.v1
     );
     let antwort: SPHttpClientResponse = await abfrage('Title,Tag,Text,Bild,Link,Frage');
-    if (antwort.status === 400) {
+    if (!antwort.ok && antwort.status !== 404) {
       // Ältere Liste ohne Spalte "Frage": ohne sie laden, bis "Liste anlegen" sie ergänzt.
       antwort = await abfrage('Title,Tag,Text,Bild,Link');
     }
@@ -48,7 +48,7 @@ export class AdventskalenderListe {
       throw new ListeNichtGefunden(this._listenName);
     }
     if (!antwort.ok) {
-      throw new Error(`Die Liste konnte nicht geladen werden (${antwort.status}).`);
+      throw new Error(`Die Liste konnte nicht geladen werden: ${await fehlermeldung(antwort)}`);
     }
     const daten: { value: IListenZeile[] } = await antwort.json();
     const inhalte: ITuerchenInhalt[] = [];

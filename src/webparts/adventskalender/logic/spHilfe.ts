@@ -6,7 +6,7 @@ export function listenPfad(webUrl: string, listenName: string): string {
   return `${webUrl}/_api/web/lists/getbytitle('${encodeURIComponent(listenName.replace(/'/g, "''"))}')`;
 }
 
-async function fehlermeldung(antwort: SPHttpClientResponse): Promise<string> {
+export async function fehlermeldung(antwort: SPHttpClientResponse): Promise<string> {
   try {
     const fehler: { error?: { message?: string } } = await antwort.json();
     return fehler.error?.message || String(antwort.status);
