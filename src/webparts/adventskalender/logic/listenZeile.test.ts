@@ -13,7 +13,7 @@ describe('sichereUrl', () => {
 describe('zeileZuInhalt', () => {
   it('wandelt eine Listenzeile in einen Türchen-Inhalt um', () => {
     expect(zeileZuInhalt({ Title: 'Plätzchen', Tag: 3, Text: 'Rezept', Bild: { Url: 'https://x/y.png' }, Link: null }))
-      .toEqual({ tag: 3, titel: 'Plätzchen', text: 'Rezept', bildUrl: 'https://x/y.png', linkUrl: undefined });
+      .toEqual({ tag: 3, titel: 'Plätzchen', text: 'Rezept', bildUrl: 'https://x/y.png', linkUrl: undefined, frage: false });
   });
 
   it('ignoriert Zeilen ohne gültigen Tag', () => {

@@ -1,5 +1,6 @@
 import { ITuerchenInhalt } from '../logic/ITuerchenInhalt';
 import { Design } from '../logic/designs';
+import { IAntwortDienst } from '../logic/IAntwortDienst';
 
 export interface IAdventskalenderProps {
   titel: string;
@@ -18,6 +19,8 @@ export interface IAdventskalenderProps {
   onDesignAendern?: (design: Design) => void;
   /** Schlüssel für den Browser-Speicher, in dem geöffnete Türchen gemerkt werden. */
   speicherSchluessel: string;
+  /** Antworten abschicken und auswerten; ohne Dienst gibt es kein Antwortfeld. */
+  antwortDienst?: IAntwortDienst;
   /** Für Tests und die Vorschau; Standard ist die aktuelle Uhrzeit. */
   jetzt?: Date;
 }

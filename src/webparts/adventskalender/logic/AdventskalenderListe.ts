@@ -3,11 +3,12 @@ import { ITuerchenInhalt } from './ITuerchenInhalt';
 import { ANZAHL_TUERCHEN } from './freischaltung';
 import { IListenZeile, zeileZuInhalt } from './listenZeile';
 import { BEISPIELE } from './beispielDaten';
+import { listenPfad, listeSicherstellen, sende, spaltenSicherstellen } from './spHilfe';
 
 // Zugriff auf die SharePoint-Liste mit den Türchen-Inhalten (eine Zeile pro Tag und Jahr).
 //
 // Spalten: Title (Titel), Tag (Zahl 1-24), Jahr (Zahl), Text (mehrzeilig, nur Text),
-// Bild (Link/Bild-Adresse) und Link (Link). Spaltennamen sind bewusst einfach gehalten,
+// Bild (Link/Bild-Adresse), Link (Link) und Frage (Ja/Nein: Antwortfeld zeigen). Spaltennamen sind bewusst einfach gehalten,
 // damit Redakteure sie in der Listenansicht wiedererkennen.
 
 export class ListeNichtGefunden extends Error {
@@ -25,7 +26,7 @@ export class AdventskalenderListe {
   ) {}
 
   private get _listenPfad(): string {
-    return `${this._webUrl}/_api/web/lists/getbytitle('${encodeURIComponent(this._listenName.replace(/'/g, "''"))}')`;
+    return listenPfad(this._webUrl, this._listenName);
   }
 
   /** Lädt die Inhalte der Tage 1 bis bisTag. Spätere Tage werden gar nicht erst abgefragt. */
@@ -34,10 +35,15 @@ export class AdventskalenderListe {
       return [];
     }
     const filter: string = `Jahr eq ${jahr} and Tag le ${bisTag}`;
-    const antwort: SPHttpClientResponse = await this._client.get(
-      `${this._listenPfad}/items?$select=Title,Tag,Text,Bild,Link&$filter=${encodeURIComponent(filter)}&$top=100`,
+    const abfrage = (spalten: string): Promise<SPHttpClientResponse> => this._client.get(
+      `${this._listenPfad}/items?$select=${spalten}&$filter=${encodeURIComponent(filter)}&$top=100`,
       SPHttpClient.configurations.v1
     );
+    let antwort: SPHttpClientResponse = await abfrage('Title,Tag,Text,Bild,Link,Frage');
+    if (antwort.status === 400) {
+      // Ältere Liste ohne Spalte "Frage": ohne sie laden, bis "Liste anlegen" sie ergänzt.
+      antwort = await abfrage('Title,Tag,Text,Bild,Link');
+    }
     if (antwort.status === 404) {
       throw new ListeNichtGefunden(this._listenName);
     }
@@ -60,65 +66,47 @@ export class AdventskalenderListe {
    * mit Beispielinhalten, die Redakteure danach überschreiben. Bestehende Zeilen bleiben unverändert. Liefert die Zahl neuer Zeilen.
    */
   public async anlegen(jahr: number): Promise<number> {
-    const vorhanden: SPHttpClientResponse = await this._client.get(
-      `${this._listenPfad}?$select=Id`,
-      SPHttpClient.configurations.v1
+    await listeSicherstellen(
+      this._client, this._webUrl, this._listenName, 'Inhalte für das Adventskalender-Webpart: eine Zeile pro Türchen.'
     );
-    if (vorhanden.status === 404) {
-      await this._sende(`${this._webUrl}/_api/web/lists`, {
-        Title: this._listenName,
-        Description: 'Inhalte für das Adventskalender-Webpart: eine Zeile pro Türchen.',
-        BaseTemplate: 100
-      });
-      const spalten: string[] = [
-        '<Field Type="Number" DisplayName="Tag" Name="Tag" Required="TRUE" Min="1" Max="24" Decimals="0" />',
-        '<Field Type="Number" DisplayName="Jahr" Name="Jahr" Required="TRUE" Decimals="0" />',
-        '<Field Type="Note" DisplayName="Text" Name="Text" NumLines="8" RichText="FALSE" />',
-        '<Field Type="URL" DisplayName="Bild" Name="Bild" Format="Image" />',
-        '<Field Type="URL" DisplayName="Link" Name="Link" Format="Hyperlink" />'
-      ];
-      for (const schema of spalten) {
-        // 25 = zum Standard-Inhaltstyp und zur Standardansicht hinzufügen, interner Name wie angegeben.
-        await this._sende(`${this._listenPfad}/fields/createfieldasxml`, {
-          parameters: { SchemaXml: schema, Options: 25 }
-        });
-      }
-    } else if (!vorhanden.ok) {
-      throw new Error(`Die Liste konnte nicht geprüft werden (${vorhanden.status}).`);
-    }
+    const neueSpalten: string[] = await spaltenSicherstellen(this._client, this._listenPfad, [
+      '<Field Type="Number" DisplayName="Tag" Name="Tag" Required="TRUE" Min="1" Max="24" Decimals="0" />',
+      '<Field Type="Number" DisplayName="Jahr" Name="Jahr" Required="TRUE" Decimals="0" />',
+      '<Field Type="Note" DisplayName="Text" Name="Text" NumLines="8" RichText="FALSE" />',
+      '<Field Type="URL" DisplayName="Bild" Name="Bild" Format="Image" />',
+      '<Field Type="URL" DisplayName="Link" Name="Link" Format="Hyperlink" />',
+      '<Field Type="Boolean" DisplayName="Frage (Antwortfeld zeigen)" Name="Frage"><Default>0</Default></Field>'
+    ]);
 
     const bestehend: SPHttpClientResponse = await this._client.get(
-      `${this._listenPfad}/items?$select=Tag&$filter=${encodeURIComponent(`Jahr eq ${jahr}`)}&$top=100`,
+      `${this._listenPfad}/items?$select=Id,Tag,Title&$filter=${encodeURIComponent(`Jahr eq ${jahr}`)}&$top=100`,
       SPHttpClient.configurations.v1
     );
     if (!bestehend.ok) {
       throw new Error(`Die vorhandenen Zeilen konnten nicht gelesen werden (${bestehend.status}).`);
     }
-    const tage: number[] = ((await bestehend.json()).value as IListenZeile[]).map(z => Number(z.Tag));
+    const zeilen: { Id: number; Tag: number; Title: string }[] = (await bestehend.json()).value;
+    const tage: number[] = zeilen.map(z => Number(z.Tag));
     let neu: number = 0;
     for (let tag: number = 1; tag <= ANZAHL_TUERCHEN; tag++) {
+      const beispiel = BEISPIELE[tag - 1];
       if (tage.indexOf(tag) === -1) {
-        const beispiel = BEISPIELE[tag - 1];
-        await this._sende(`${this._listenPfad}/items`, { Title: beispiel.titel, Text: beispiel.text, Tag: tag, Jahr: jahr });
+        await this._sende(`${this._listenPfad}/items`, {
+          Title: beispiel.titel, Text: beispiel.text, Tag: tag, Jahr: jahr, Frage: !!beispiel.loesung
+        });
         neu++;
+      } else if (neueSpalten.indexOf('Frage') !== -1 && beispiel.loesung) {
+        // Spalte gerade nachgerüstet: das unveränderte Beispielrätsel bekommt gleich ein Antwortfeld.
+        const zeile = zeilen.filter(z => Number(z.Tag) === tag)[0];
+        if (zeile.Title === beispiel.titel) {
+          await sende(this._client, `${this._listenPfad}/items(${zeile.Id})`, { Frage: true }, 'MERGE');
+        }
       }
     }
     return neu;
   }
 
   private async _sende(url: string, inhalt: object): Promise<void> {
-    const antwort: SPHttpClientResponse = await this._client.post(url, SPHttpClient.configurations.v1, {
-      body: JSON.stringify(inhalt)
-    });
-    if (!antwort.ok) {
-      let meldung: string = String(antwort.status);
-      try {
-        const fehler: { error?: { message?: string } } = await antwort.json();
-        meldung = fehler.error?.message || meldung;
-      } catch {
-        // Antwort ohne JSON: Statuscode reicht.
-      }
-      throw new Error(`SharePoint hat die Änderung abgelehnt: ${meldung}`);
-    }
+    await sende(this._client, url, inhalt);
   }
 }

@@ -5,4 +5,6 @@ export interface ITuerchenInhalt {
   text: string;
   bildUrl?: string;
   linkUrl?: string;
+  /** Zeigt ein Antwortfeld unter dem Inhalt. */
+  frage?: boolean;
 }

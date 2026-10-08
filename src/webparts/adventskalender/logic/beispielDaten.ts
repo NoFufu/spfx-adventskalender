@@ -4,6 +4,8 @@
 export interface IBeispielInhalt {
   titel: string;
   text: string;
+  /** Bei Rätseln: Lösung für die automatische Prüfung der Antworten. */
+  loesung?: string;
 }
 
 export const BEISPIELE: IBeispielInhalt[] = [
@@ -13,7 +15,7 @@ export const BEISPIELE: IBeispielInhalt[] = [
   { titel: 'Barbaratag', text: 'Heute Kirschzweige schneiden und in eine Vase stellen. Mit etwas Glück blühen sie an Heiligabend.' },
   { titel: 'Feierabend-Tipp', text: 'Heute einmal ohne Bildschirm in den Abend: Kerze an, Lieblingsmusik, und das Handy bleibt im Flur.' },
   { titel: 'Nikolaus', text: 'Stiefel geputzt? Heute ist Nikolaustag. Eine kleine Aufmerksamkeit für die Kollegin oder den Kollegen nebenan freut garantiert.' },
-  { titel: 'Rätsel', text: 'Was wird nasser, je mehr es trocknet? Die Auflösung gibt es morgen hinter Türchen 8.' },
+  { titel: 'Rätsel', text: 'Was wird nasser, je mehr es trocknet? Schick deine Antwort unten ab. Die Auflösung gibt es morgen hinter Türchen 8.', loesung: 'Handtuch; Handtücher; Geschirrtuch; Badetuch' },
   { titel: 'Auflösung und Bastel-Tipp', text: 'Ein Handtuch! Und zum Basteln: Aus einem Blatt Papier, sechsmal gefaltet und eingeschnitten, wird eine Schneeflocke fürs Bürofenster.' },
   { titel: 'Fundstück', text: 'Platz für ein Foto oder eine Geschichte aus dem Team. Einfach in der Liste ein Bild und einen Text eintragen.' },
   { titel: 'Plätzchen-Rezept', text: 'Vanillekipferl: 250 g Mehl, 200 g Butter, 100 g gemahlene Mandeln, 80 g Zucker verkneten, Hörnchen formen, bei 175 °C etwa 12 Minuten backen und in Vanillezucker wälzen.' },

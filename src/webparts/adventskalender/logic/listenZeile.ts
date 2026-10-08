@@ -15,6 +15,7 @@ export interface IListenZeile {
   Bild?: IUrlFeld | null;
   // eslint-disable-next-line @rushstack/no-new-null
   Link?: IUrlFeld | null;
+  Frage?: boolean;
 }
 
 /** Nur http(s)-Adressen übernehmen, damit kein "javascript:"-Link in den Kalender gelangt. */
@@ -35,6 +36,7 @@ export function zeileZuInhalt(zeile: IListenZeile): ITuerchenInhalt | undefined 
     titel: zeile.Title || `${tag}. Dezember`,
     text: zeile.Text || '',
     bildUrl: sichereUrl(zeile.Bild?.Url),
-    linkUrl: sichereUrl(zeile.Link?.Url)
+    linkUrl: sichereUrl(zeile.Link?.Url),
+    frage: !!zeile.Frage
   };
 }

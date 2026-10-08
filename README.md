@@ -37,3 +37,11 @@ Webpart-Einstellungen: Überschrift, Design, Jahr (leer = aktuelles Jahr), gemis
 ## Auslieferung
 
 Der CI-Workflow baut bei jedem Push die `.sppkg` und legt sie als Artefakt ab. Hochladen in den App-Katalog des Tenants, danach das Webpart "Adventskalender" auf einer Seite einfügen.
+
+## Antworten auf Rätselfragen
+
+- In der Inhaltsliste die Spalte **Frage (Antwortfeld zeigen)** für den Tag ankreuzen. Dann erscheint unter dem Inhalt ein Antwortfeld. Name und E-Mail kommen automatisch von der angemeldeten Person.
+- Antworten sind nur am Tag des Türchens möglich und bis 24 Uhr änderbar. Sie landen in der Liste **Adventskalender-Antworten**, in der jeder nur die eigenen Einträge sieht.
+- Die Lösung steht in der Liste **Adventskalender-Loesungen** (Tag, Jahr, Lösung). Mehrere erlaubte Antworten mit Semikolon trennen. Die Liste ist nur für Besitzer der Website lesbar.
+- Im Bearbeitungsmodus der Seite öffnet **Antworten auswerten** die Auswertung: offene Antworten werden automatisch gegen die Lösung geprüft (richtig, falsch, zu spät) und gespeichert. Ergebnisse lassen sich per Klick korrigieren, und ein Gewinner kann unter den richtigen Antworten ausgelost werden.
+- „Liste anlegen“ in den Webpart-Einstellungen legt beide Listen an und ergänzt die Spalte „Frage“ in einer bestehenden Inhaltsliste.

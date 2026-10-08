@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dialog, DialogType, IDialogContentStyles, IDialogStyles, Link } from '@fluentui/react';
+import { DefaultButton, Dialog, DialogType, IDialogContentStyles, IDialogStyles, Link } from '@fluentui/react';
 import styles from './Adventskalender.module.scss';
 import type { IAdventskalenderProps } from './IAdventskalenderProps';
 import type { ITuerchenInhalt } from '../logic/ITuerchenInhalt';
@@ -8,6 +8,9 @@ import { belegePlaetze, IBelegung, IZelle, spannweite } from '../logic/layout';
 import { Design, DESIGN_KNOEPFE, DIALOG_FARBEN, gueltigesDesign, IDialogFarben } from '../logic/designs';
 import Tuerchen, { TuerGroesse } from './Tuerchen';
 import Deko from './Deko';
+import AntwortFeld from './AntwortFeld';
+import Auswertung from './Auswertung';
+import { antwortMoeglich } from '../logic/auswertung';
 
 // Dialog im Stil des gewählten Designs statt im Standard-Look.
 function dialogStil(farben: IDialogFarben): Partial<IDialogStyles> {
@@ -83,7 +86,8 @@ function speichereEigenesDesign(schluessel: string, design: Design): void {
 }
 
 export default function Adventskalender(props: IAdventskalenderProps): React.ReactElement<IAdventskalenderProps> {
-  const { titel, jahr, gemischt, vorschau, speicherSchluessel, ladeInhalte, ladeSchluessel, bearbeitungsModus, onDesignAendern } = props;
+  const { titel, jahr, gemischt, vorschau, speicherSchluessel, ladeInhalte, ladeSchluessel, bearbeitungsModus, onDesignAendern, antwortDienst } = props;
+  const [auswertungOffen, setAuswertungOffen] = React.useState<boolean>(false);
   const designSchluessel: string = `${speicherSchluessel}-design`;
   const [eigenesDesign, setEigenesDesign] = React.useState<Design | undefined>(() => ladeEigenesDesign(designSchluessel));
   // Im Bearbeitungsmodus zählt das Design der Seite, sonst die eigene Auswahl des Besuchers.
@@ -167,6 +171,9 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
         </div>
         <div className={styles.kopfRechts}>
           {vorschau && <span className={styles.vorschauHinweis}>Vorschau: alle Türchen offen</span>}
+          {bearbeitungsModus && antwortDienst && (
+            <DefaultButton text="Antworten auswerten" iconProps={{ iconName: 'CheckList' }} onClick={() => setAuswertungOffen(true)} />
+          )}
           <div className={styles.designWahl} role="group" aria-label="Design wählen">
             {DESIGN_KNOEPFE.map(knopf => (
               <button
@@ -227,7 +234,18 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
             Mehr dazu
           </Link>
         )}
+        {inhalt?.frage && antwortDienst && offenerTag !== undefined && (
+          <AntwortFeld
+            tag={offenerTag}
+            dienst={antwortDienst}
+            moeglich={antwortMoeglich(offenerTag, jahr, jetzt, vorschau)}
+            farben={farben}
+          />
+        )}
       </Dialog>
+      {antwortDienst && bearbeitungsModus && (
+        <Auswertung dienst={antwortDienst} offen={auswertungOffen} onSchliessen={() => setAuswertungOffen(false)} />
+      )}
     </section>
   );
 }

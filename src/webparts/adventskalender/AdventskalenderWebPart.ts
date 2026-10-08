@@ -16,6 +16,7 @@ import * as strings from 'AdventskalenderWebPartStrings';
 import Adventskalender from './components/Adventskalender';
 import { IAdventskalenderProps } from './components/IAdventskalenderProps';
 import { AdventskalenderListe } from './logic/AdventskalenderListe';
+import { AntwortenListe } from './logic/AntwortenListe';
 import { hoechsterOffenerTag } from './logic/freischaltung';
 import { Design, DESIGNS, gueltigesDesign } from './logic/designs';
 
@@ -37,6 +38,9 @@ export default class AdventskalenderWebPart extends BaseClientSideWebPart<IAdven
   private _legtAn: boolean = false;
   /** Wird erhöht, wenn die Liste angelegt wurde, damit der Kalender neu lädt. */
   private _ladeZaehler: number = 0;
+  /** Bleibt gleich, solange Liste und Jahr gleich sind, damit offene Antwortfelder nicht neu laden. */
+  private _antworten: AntwortenListe | undefined;
+  private _antwortenSchluessel: string = '';
 
   public render(): void {
     const jahr: number = this._jahr();
@@ -62,7 +66,8 @@ export default class AdventskalenderWebPart extends BaseClientSideWebPart<IAdven
           this.context.propertyPane.refresh();
           this.render();
         },
-        speicherSchluessel: `adventskalender-${this.context.instanceId}-${jahr}`
+        speicherSchluessel: `adventskalender-${this.context.instanceId}-${jahr}`,
+        antwortDienst: this._antwortListe(jahr)
       }
     );
 
@@ -86,6 +91,22 @@ export default class AdventskalenderWebPart extends BaseClientSideWebPart<IAdven
     );
   }
 
+  private _antwortListe(jahr: number): AntwortenListe {
+    const schluessel: string = `${this._listenName()}|${jahr}`;
+    if (!this._antworten || this._antwortenSchluessel !== schluessel) {
+      const benutzer = this.context.pageContext.user;
+      this._antworten = new AntwortenListe(
+        this.context.spHttpClient,
+        this.context.pageContext.web.absoluteUrl,
+        this._listenName(),
+        jahr,
+        { id: this.context.pageContext.legacyPageContext.userId, name: benutzer.displayName, email: benutzer.email }
+      );
+      this._antwortenSchluessel = schluessel;
+    }
+    return this._antworten;
+  }
+
   private async _listeAnlegen(): Promise<void> {
     if (this._legtAn) {
       return;
@@ -95,9 +116,11 @@ export default class AdventskalenderWebPart extends BaseClientSideWebPart<IAdven
     this.context.propertyPane.refresh();
     try {
       const neu: number = await this._liste().anlegen(this._jahr());
-      this._anlegenStatus = neu > 0
-        ? strings.ListeAngelegt.replace('{0}', String(neu))
-        : strings.ListeVollstaendig;
+      const hinweise: string[] = await this._antwortListe(this._jahr()).anlegen();
+      this._anlegenStatus = [
+        neu > 0 ? strings.ListeAngelegt.replace('{0}', String(neu)) : strings.ListeVollstaendig,
+        ...hinweise
+      ].join(' ');
     } catch (fehler) {
       this._anlegenStatus = (fehler as Error).message;
     }

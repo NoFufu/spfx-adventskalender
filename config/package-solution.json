@@ -3,7 +3,7 @@
   "solution": {
     "name": "spfx-adventskalender-client-side-solution",
     "id": "1130696c-94f8-4c83-b978-0ce934151719",
-    "version": "1.6.0.0",
+    "version": "1.7.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "spfx-adventskalender Feature",
         "description": "The feature that activates elements of the spfx-adventskalender solution.",
         "id": "93e664b1-b429-445e-87ea-ea9ee5400f1a",
-        "version": "1.6.0.0"
+        "version": "1.7.0.0"
       }
     ]
   },
