@@ -18,6 +18,13 @@ export class ListeNichtGefunden extends Error {
   }
 }
 
+export interface IAnlegeErgebnis {
+  /** Neu angelegte oder gefüllte Zeilen. */
+  neu: number;
+  /** Tage, an denen der Beispielinhalt steht; nur für sie werden Beispiellösungen eingetragen. */
+  beispielTage: number[];
+}
+
 export class AdventskalenderListe {
   constructor(
     private readonly _client: SPHttpClient,
@@ -63,9 +70,9 @@ export class AdventskalenderListe {
 
   /**
    * Legt die Liste mit allen Spalten an (falls sie fehlt) und füllt fehlende Tage des Jahres
-   * mit Beispielinhalten, die Redakteure danach überschreiben. Bestehende Zeilen bleiben unverändert. Liefert die Zahl neuer Zeilen.
+   * mit Beispielinhalten, die Redakteure danach überschreiben. Bestehende Zeilen bleiben unverändert. Leere Zeilen werden ebenfalls gefüllt. Liefert die Zahl neuer oder gefüllter Zeilen.
    */
-  public async anlegen(jahr: number): Promise<number> {
+  public async anlegen(jahr: number): Promise<IAnlegeErgebnis> {
     await listeSicherstellen(
       this._client, this._webUrl, this._listenName, 'Inhalte für das Adventskalender-Webpart: eine Zeile pro Türchen.'
     );
@@ -79,15 +86,16 @@ export class AdventskalenderListe {
     ]);
 
     const bestehend: SPHttpClientResponse = await this._client.get(
-      `${this._listenPfad}/items?$select=Id,Tag,Title&$filter=${encodeURIComponent(`Jahr eq ${jahr}`)}&$top=100`,
+      `${this._listenPfad}/items?$select=Id,Tag,Title,Text&$filter=${encodeURIComponent(`Jahr eq ${jahr}`)}&$top=100`,
       SPHttpClient.configurations.v1
     );
     if (!bestehend.ok) {
       throw new Error(`Die vorhandenen Zeilen konnten nicht gelesen werden (${bestehend.status}).`);
     }
-    const zeilen: { Id: number; Tag: number; Title: string }[] = (await bestehend.json()).value;
+    const zeilen: { Id: number; Tag: number; Title?: string; Text?: string }[] = (await bestehend.json()).value;
     const tage: number[] = zeilen.map(z => Number(z.Tag));
     let neu: number = 0;
+    const beispielTage: number[] = [];
     for (let tag: number = 1; tag <= ANZAHL_TUERCHEN; tag++) {
       const beispiel = BEISPIELE[tag - 1];
       if (tage.indexOf(tag) === -1) {
@@ -95,15 +103,26 @@ export class AdventskalenderListe {
           Title: beispiel.titel, Text: beispiel.text, Tag: tag, Jahr: jahr, Frage: !!beispiel.loesung
         });
         neu++;
-      } else if (neueSpalten.indexOf('Frage') !== -1 && beispiel.loesung) {
-        // Spalte gerade nachgerüstet: das unveränderte Beispielrätsel bekommt gleich ein Antwortfeld.
+        beispielTage.push(tag);
+      } else {
         const zeile = zeilen.filter(z => Number(z.Tag) === tag)[0];
-        if (zeile.Title === beispiel.titel) {
+        if (!(zeile.Title || '').trim() && !(zeile.Text || '').trim()) {
+          // Leere Zeile (nur Tag und Jahr): mit dem Beispiel füllen, Inhalte von Redakteuren bleiben unberührt.
+          await sende(this._client, `${this._listenPfad}/items(${zeile.Id})`, {
+            Title: beispiel.titel, Text: beispiel.text, Frage: !!beispiel.loesung
+          }, 'MERGE');
+          neu++;
+          beispielTage.push(tag);
+        } else if (zeile.Title === beispiel.titel) {
+          beispielTage.push(tag);
+        }
+        if (neueSpalten.indexOf('Frage') !== -1 && beispiel.loesung && zeile.Title === beispiel.titel) {
+          // Spalte gerade nachgerüstet: das unveränderte Beispielrätsel bekommt gleich ein Antwortfeld.
           await sende(this._client, `${this._listenPfad}/items(${zeile.Id})`, { Frage: true }, 'MERGE');
         }
       }
     }
-    return neu;
+    return { neu, beispielTage };
   }
 
   private async _sende(url: string, inhalt: object): Promise<void> {

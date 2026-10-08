@@ -33,7 +33,7 @@ export function zeileZuInhalt(zeile: IListenZeile): ITuerchenInhalt | undefined 
   }
   return {
     tag,
-    titel: zeile.Title || `${tag}. Dezember`,
+    titel: zeile.Title || '',
     text: zeile.Text || '',
     bildUrl: sichereUrl(zeile.Bild?.Url),
     linkUrl: sichereUrl(zeile.Link?.Url),

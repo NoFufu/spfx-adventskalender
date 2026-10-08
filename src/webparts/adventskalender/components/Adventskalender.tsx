@@ -219,7 +219,7 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
         onDismiss={() => setOffenerTag(undefined)}
         dialogContentProps={{
           type: DialogType.close,
-          title: inhalt?.titel ?? `Türchen ${offenerTag}`,
+          title: inhalt?.titel || `Türchen ${offenerTag}`,
           closeButtonAriaLabel: 'Schließen',
           styles: dialogInhaltStil(farben)
         }}

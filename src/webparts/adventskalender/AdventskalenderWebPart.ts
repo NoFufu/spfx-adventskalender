@@ -115,8 +115,8 @@ export default class AdventskalenderWebPart extends BaseClientSideWebPart<IAdven
     this._anlegenStatus = strings.ListeWirdAngelegt;
     this.context.propertyPane.refresh();
     try {
-      const neu: number = await this._liste().anlegen(this._jahr());
-      const hinweise: string[] = await this._antwortListe(this._jahr()).anlegen();
+      const { neu, beispielTage } = await this._liste().anlegen(this._jahr());
+      const hinweise: string[] = await this._antwortListe(this._jahr()).anlegen(beispielTage);
       this._anlegenStatus = [
         neu > 0 ? strings.ListeAngelegt.replace('{0}', String(neu)) : strings.ListeVollstaendig,
         ...hinweise

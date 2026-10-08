@@ -33,8 +33,8 @@ describe('Antworten von Anfang bis Ende', () => {
 
     // 1. Levi klickt "Liste anlegen".
     sp.jetzt = new Date(2026, 9, 8, 12);
-    const neu: number = await new AdventskalenderListe(sp.client(LEVI.id), WEB, 'Adventskalender').anlegen(2026);
-    const hinweise: string[] = await dienst(sp, LEVI).anlegen();
+    const { neu, beispielTage } = await new AdventskalenderListe(sp.client(LEVI.id), WEB, 'Adventskalender').anlegen(2026);
+    const hinweise: string[] = await dienst(sp, LEVI).anlegen(beispielTage);
     expect(neu).toBe(0);
     expect(hinweise).toEqual([]);
     expect(sp.listen.get('Adventskalender')?.felder.has('Frage')).toBe(true);
@@ -84,11 +84,36 @@ describe('Antworten von Anfang bis Ende', () => {
   it('wertet in der Vorschau auch vor Dezember aus', async () => {
     const sp: NachgebautesSharePoint = aufbauen();
     sp.jetzt = new Date(2026, 9, 8, 12);
-    await new AdventskalenderListe(sp.client(LEVI.id), WEB, 'Adventskalender').anlegen(2026);
-    await dienst(sp, LEVI).anlegen();
+    const { beispielTage } = await new AdventskalenderListe(sp.client(LEVI.id), WEB, 'Adventskalender').anlegen(2026);
+    await dienst(sp, LEVI).anlegen(beispielTage);
     await dienst(sp, ANNA).senden(7, 'handtuch');
     const { antworten } = await offeneAuswerten(dienst(sp, LEVI), true);
     expect(antworten[0].ergebnis).toBe('richtig');
+  });
+
+  it('füllt leere Zeilen mit Rätselfragen und lässt eigene Inhalte in Ruhe', async () => {
+    const sp: NachgebautesSharePoint = new NachgebautesSharePoint([LEVI.id]);
+    // Eigene Liste mit 24 Zeilen, nur Tag und Jahr ausgefüllt; an Tag 2 steht schon eine eigene Frage.
+    const liste = sp.listeAnlegen('Adventskalender 26', ['Tag', 'Jahr', 'Text', 'Bild', 'Link']);
+    for (let tag: number = 1; tag <= 24; tag++) {
+      sp.eintragAnlegen(liste, tag === 2 ? { Title: 'Unsere Frage', Text: 'Wer hat das Büro geschmückt?', Tag: tag, Jahr: 2026 } : { Tag: tag, Jahr: 2026 }, LEVI.id);
+    }
+    const kalender: AdventskalenderListe = new AdventskalenderListe(sp.client(LEVI.id), WEB, 'Adventskalender 26');
+    const { neu, beispielTage } = await kalender.anlegen(2026);
+    await new AntwortenListe(sp.client(LEVI.id), WEB, 'Adventskalender 26', 2026, LEVI).anlegen(beispielTage);
+    expect(neu).toBe(23);
+
+    const inhalte: ITuerchenInhalt[] = await kalender.laden(2026, 24);
+    const tag = (t: number): ITuerchenInhalt => inhalte.filter(i => i.tag === t)[0];
+    expect(tag(2).titel).toBe('Unsere Frage');
+    expect(tag(9).frage).toBe(true);
+    expect(tag(9).text).toContain('Stille Nacht');
+    expect(inhalte.filter(i => i.frage).length).toBeGreaterThanOrEqual(8);
+
+    // Lösungen gibt es nur für Beispielfragen, nicht für Levis eigene Frage an Tag 2.
+    const loesungen = await new AntwortenListe(sp.client(LEVI.id), WEB, 'Adventskalender 26', 2026, LEVI).loesungen();
+    expect(loesungen.map(l => l.tag)).toContain(9);
+    expect(loesungen.map(l => l.tag)).not.toContain(2);
   });
 
   it('lädt eine alte Liste ohne Spalte "Frage" trotzdem', async () => {

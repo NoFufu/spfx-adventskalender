@@ -116,7 +116,7 @@ export class AntwortenListe implements IAntwortDienst {
    * Legt beide Listen an (falls sie fehlen), schränkt die Rechte ein und trägt die Beispiellösung ein.
    * Liefert Hinweise, falls etwas von Hand nachgestellt werden muss.
    */
-  public async anlegen(): Promise<string[]> {
+  public async anlegen(beispielTage: number[]): Promise<string[]> {
     const hinweise: string[] = [];
     const antwortName: string = AntwortenListe.antwortListe(this._inhaltsListe);
     const neuAntworten: boolean = await listeSicherstellen(
@@ -164,11 +164,13 @@ export class AntwortenListe implements IAntwortDienst {
           'Bitte dort die Berechtigungen so einstellen, dass nur Organisatoren sie lesen können.'
         );
       }
-      for (let tag: number = 1; tag <= BEISPIELE.length; tag++) {
-        const loesung: string | undefined = BEISPIELE[tag - 1].loesung;
-        if (loesung) {
-          await sende(this._client, `${this._loesungen}/items`, { Title: `Türchen ${tag}`, Tag: tag, Jahr: this._jahr, Loesung: loesung });
-        }
+    }
+    // Beispiellösungen nur für Tage mit Beispielinhalt und ohne Lösung; vorhandene bleiben unverändert.
+    const vorhanden: number[] = (await this.loesungen()).map(l => l.tag);
+    for (let tag: number = 1; tag <= BEISPIELE.length; tag++) {
+      const loesung: string | undefined = BEISPIELE[tag - 1].loesung;
+      if (loesung && beispielTage.indexOf(tag) !== -1 && vorhanden.indexOf(tag) === -1) {
+        await sende(this._client, `${this._loesungen}/items`, { Title: `Türchen ${tag}`, Tag: tag, Jahr: this._jahr, Loesung: loesung });
       }
     }
     return hinweise;
