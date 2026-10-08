@@ -5,7 +5,7 @@ import type { IAdventskalenderProps } from './IAdventskalenderProps';
 import type { ITuerchenInhalt } from '../logic/ITuerchenInhalt';
 import { adventsHinweis, istOffen, tageBisOffen } from '../logic/freischaltung';
 import { belegePlaetze, IBelegterPlatz } from '../logic/layout';
-import { Design, DESIGN_KNOEPFE, DIALOG_FARBEN, IDialogFarben } from '../logic/designs';
+import { Design, DESIGN_KNOEPFE, DIALOG_FARBEN, gueltigesDesign, IDialogFarben } from '../logic/designs';
 import Tuerchen from './Tuerchen';
 
 // Dialog im Stil des gewählten Designs statt im Standard-Look.
@@ -63,8 +63,38 @@ function speichereGeoeffnete(schluessel: string, tage: number[]): void {
   }
 }
 
+// Besucher können sich ein Design aussuchen; das gilt nur in ihrem Browser.
+function ladeEigenesDesign(schluessel: string): Design | undefined {
+  try {
+    const wert: string | null = window.localStorage.getItem(schluessel);
+    return wert ? gueltigesDesign(wert) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function speichereEigenesDesign(schluessel: string, design: Design): void {
+  try {
+    window.localStorage.setItem(schluessel, design);
+  } catch {
+    // Ohne Browser-Speicher gilt die Auswahl nur bis zum Neuladen.
+  }
+}
+
 export default function Adventskalender(props: IAdventskalenderProps): React.ReactElement<IAdventskalenderProps> {
-  const { titel, jahr, gemischt, vorschau, speicherSchluessel, ladeInhalte, ladeSchluessel, bearbeitungsModus, design, onDesignAendern } = props;
+  const { titel, jahr, gemischt, vorschau, speicherSchluessel, ladeInhalte, ladeSchluessel, bearbeitungsModus, onDesignAendern } = props;
+  const designSchluessel: string = `${speicherSchluessel}-design`;
+  const [eigenesDesign, setEigenesDesign] = React.useState<Design | undefined>(() => ladeEigenesDesign(designSchluessel));
+  // Im Bearbeitungsmodus zählt das Design der Seite, sonst die eigene Auswahl des Besuchers.
+  const design: Design = !bearbeitungsModus && eigenesDesign ? eigenesDesign : props.design;
+  const designWaehlen = (neu: Design): void => {
+    if (bearbeitungsModus && onDesignAendern) {
+      onDesignAendern(neu);
+      return;
+    }
+    setEigenesDesign(neu);
+    speichereEigenesDesign(designSchluessel, neu);
+  };
   const farben: IDialogFarben = DIALOG_FARBEN[design];
   const jetzt: Date = props.jetzt ?? new Date();
   const [offenerTag, setOffenerTag] = React.useState<number | undefined>(undefined);
@@ -119,22 +149,20 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
         </div>
         <div className={styles.kopfRechts}>
           {vorschau && <span className={styles.vorschauHinweis}>Vorschau: alle Türchen offen</span>}
-          {bearbeitungsModus && onDesignAendern && (
-            <div className={styles.designWahl} role="group" aria-label="Design wählen">
-              {DESIGN_KNOEPFE.map(knopf => (
-                <button
-                  key={knopf.key}
-                  type="button"
-                  className={`${styles.designKnopf} ${knopf.key === design ? styles.designAktiv : ''}`}
-                  aria-pressed={knopf.key === design}
-                  onClick={() => onDesignAendern(knopf.key)}
-                >
-                  <span className={styles.designFarbe} style={{ background: knopf.farbe }} />
-                  {knopf.name}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className={styles.designWahl} role="group" aria-label="Design wählen">
+            {DESIGN_KNOEPFE.map(knopf => (
+              <button
+                key={knopf.key}
+                type="button"
+                className={`${styles.designKnopf} ${knopf.key === design ? styles.designAktiv : ''}`}
+                aria-pressed={knopf.key === design}
+                onClick={() => designWaehlen(knopf.key)}
+              >
+                <span className={styles.designFarbe} style={{ background: knopf.farbe }} />
+                {knopf.name}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
       {bearbeitungsModus && fehler && (

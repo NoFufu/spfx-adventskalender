@@ -30,7 +30,7 @@ Die Türchen lesen ihre Inhalte aus einer SharePoint-Liste auf derselben Website
 
 Das Webpart fragt nur Zeilen ab, deren Tag schon offen ist. Wer die Liste direkt öffnet, sieht alle Zeilen; wer das verhindern will, muss die Berechtigungen der Liste einschränken.
 
-Das Design (Winternacht, IHK, Klassisch) lässt sich im Bearbeitungsmodus direkt oben rechts im Webpart umschalten. Jedes Türchen hat eine eigene Verpackung (Bandlage, Schleife, Papier), die pro Jahr gleich bleibt.
+Das Design (Winternacht, IHK, Klassisch) lässt sich direkt oben rechts im Webpart umschalten. Im Bearbeitungsmodus ändert das das Design der Seite, sonst gilt die Auswahl nur im eigenen Browser. Jedes Türchen hat eine eigene Verpackung (Bandlage, Schleife, Papier), die pro Jahr gleich bleibt.
 
 Webpart-Einstellungen: Überschrift, Design, Jahr (leer = aktuelles Jahr), gemischte Anordnung, Vorschau (alle Türchen offen, nur zum Testen), Name der Liste.
 
