@@ -13,7 +13,7 @@ export interface IAntwortFeldProps {
 }
 
 function uhrzeit(datum: Date): string {
-  return datum.toLocaleString('de-DE', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+  return datum.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 }
 
 // Antwortfeld unter dem Inhalt eines Türchens. SharePoint kennt die angemeldete Person, Name und E-Mail kommen automatisch dazu.
@@ -92,7 +92,7 @@ export default function AntwortFeld(props: IAntwortFeldProps): React.ReactElemen
             />
             <span style={{ fontSize: 13, opacity: 0.85 }}>
               {gesendet
-                ? `Gesendet als ${dienst.name} am ${uhrzeit(gesendet.geaendert)}. Ändern geht bis heute 24 Uhr.`
+                ? `Gesendet als ${dienst.name} um ${uhrzeit(gesendet.geaendert)} Uhr. Ändern geht bis heute 24 Uhr.`
                 : `Wird als ${dienst.name} abgeschickt.`}
             </span>
           </div>
@@ -101,7 +101,7 @@ export default function AntwortFeld(props: IAntwortFeldProps): React.ReactElemen
         <p style={{ margin: 0, opacity: 0.85 }}>
           {gesendet
             ? `Deine Antwort: „${gesendet.antwort}“${gesendet.ergebnis !== 'offen' ? ` (${gesendet.ergebnis})` : ''}`
-            : `Antworten waren nur am ${tag}. Dezember möglich.`}
+            : 'Antworten waren nur am Tag des Türchens möglich.'}
         </p>
       )}
     </div>

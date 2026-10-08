@@ -1,3 +1,5 @@
+import { IAntwortDienst } from './IAntwortDienst';
+
 // Automatische Prüfung von Antworten gegen die hinterlegte Lösung (ohne SharePoint-Abhängigkeit, damit testbar).
 
 export type Ergebnis = 'offen' | 'richtig' | 'falsch' | 'zu spät';
@@ -59,8 +61,9 @@ export function rechtzeitig(antwort: IAntwort): boolean {
 }
 
 /** Vorschlag für eine noch offene Antwort; undefined, wenn es keine Lösung gibt (dann bleibt sie offen). */
-export function pruefe(antwort: IAntwort, loesung: string | undefined): Ergebnis | undefined {
-  if (!rechtzeitig(antwort)) {
+export function pruefe(antwort: IAntwort, loesung: string | undefined, testlauf: boolean = false): Ergebnis | undefined {
+  // Im Testlauf (Vorschau) zählt das Datum nicht, damit man vor Dezember ausprobieren kann.
+  if (!testlauf && !rechtzeitig(antwort)) {
     return 'zu spät';
   }
   if (!loesung || erlaubteAntworten(loesung).length === 0) {
@@ -71,4 +74,25 @@ export function pruefe(antwort: IAntwort, loesung: string | undefined): Ergebnis
 
 export function antwortMoeglich(tag: number, jahr: number, jetzt: Date, vorschau: boolean): boolean {
   return vorschau || (jetzt.getFullYear() === jahr && jetzt.getMonth() === 11 && jetzt.getDate() === tag);
+}
+
+/**
+ * Lädt alle Antworten und Lösungen, prüft offene Antworten automatisch und speichert das Ergebnis.
+ * Bereits bewertete Antworten (auch von Hand korrigierte) bleiben unverändert.
+ */
+export async function offeneAuswerten(
+  dienst: IAntwortDienst,
+  testlauf: boolean
+): Promise<{ antworten: IAntwort[]; loesungen: ILoesung[] }> {
+  const [geladen, loesungen] = await Promise.all([dienst.alleAntworten(), dienst.loesungen()]);
+  const antworten: IAntwort[] = [];
+  for (const a of geladen) {
+    const vorschlag: Ergebnis | undefined =
+      a.ergebnis === 'offen' ? pruefe(a, loesungen.filter(l => l.tag === a.tag)[0]?.loesung, testlauf) : undefined;
+    if (vorschlag) {
+      await dienst.ergebnisSpeichern(a.id, vorschlag);
+    }
+    antworten.push(vorschlag ? { ...a, ergebnis: vorschlag } : a);
+  }
+  return { antworten, loesungen };
 }

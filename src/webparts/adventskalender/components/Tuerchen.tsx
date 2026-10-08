@@ -36,8 +36,6 @@ const GROESSEN: { [groesse in TuerGroesse]: string } = {
   halb: styles.halb
 };
 
-const WOCHENTAGE: string[] = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-
 /** Funkelnde Sterne auf dem Hauptgeschenk: Lage in Prozent, Größe in Pixel, Verzögerung in Sekunden. */
 const FUNKELN: { x: number; y: number; groesse: number; verzoegerung: number }[] = [
   { x: 12, y: 18, groesse: 16, verzoegerung: 0 },
@@ -109,7 +107,6 @@ export default function Tuerchen(props: ITuerchenProps): React.ReactElement<ITue
   const nochTage: string = halb
     ? `${tageBisOffen} T.`
     : `noch ${tageBisOffen} ${tageBisOffen === 1 ? 'Tag' : 'Tage'}`;
-  const wochentag: string = WOCHENTAGE[new Date(jahr, 11, tag).getDay()];
   const hinweis: string = offen
     ? `Türchen ${tag} öffnen`
     : `Türchen ${tag}, noch ${tageBisOffen} ${tageBisOffen === 1 ? 'Tag' : 'Tage'}`;
@@ -198,7 +195,6 @@ export default function Tuerchen(props: ITuerchenProps): React.ReactElement<ITue
       {heute && !geoeffnet && <span className={styles.heuteMarke} style={markeEcke}>Heute</span>}
       <span className={styles.etikett}>
         <span className={styles.zahl}>{tag}</span>
-        {halb && <span className={styles.wochentag}>{wochentag}</span>}
         {!halb && BESCHRIFTUNG[tag] && <span className={styles.beschriftung}>{BESCHRIFTUNG[tag]}</span>}
         {geoeffnet && !halb && (
           <span className={styles.inhaltTitel}>{inhaltTitel || 'Nochmal ansehen'}</span>

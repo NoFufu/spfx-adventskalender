@@ -3,11 +3,13 @@ import {
   DefaultButton, Dropdown, IDropdownOption, MessageBar, MessageBarType, Panel, PanelType, PrimaryButton, Spinner
 } from '@fluentui/react';
 import { IAntwortDienst } from '../logic/IAntwortDienst';
-import { Ergebnis, IAntwort, ILoesung, pruefe } from '../logic/auswertung';
+import { Ergebnis, IAntwort, ILoesung, offeneAuswerten } from '../logic/auswertung';
 
 export interface IAuswertungProps {
   dienst: IAntwortDienst;
   offen: boolean;
+  /** Vorschau eingeschaltet: Antworten werden unabhängig vom Datum geprüft. */
+  testlauf: boolean;
   onSchliessen: () => void;
 }
 
@@ -19,13 +21,13 @@ const FARBE: { [e in Ergebnis]: string } = {
 };
 
 function zeit(datum: Date): string {
-  return datum.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  return datum.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 }
 
 // Auswertung für Organisatoren: prüft offene Antworten automatisch gegen die Lösung, speichert das Ergebnis
 // und erlaubt Korrekturen per Klick. Sichtbar im Bearbeitungsmodus der Seite.
 export default function Auswertung(props: IAuswertungProps): React.ReactElement<IAuswertungProps> {
-  const { dienst, offen, onSchliessen } = props;
+  const { dienst, offen, testlauf, onSchliessen } = props;
   const [antworten, setAntworten] = React.useState<IAntwort[] | undefined>(undefined);
   const [loesungen, setLoesungen] = React.useState<ILoesung[]>([]);
   const [fehler, setFehler] = React.useState<string | undefined>(undefined);
@@ -40,17 +42,7 @@ export default function Auswertung(props: IAuswertungProps): React.ReactElement<
     setAntworten(undefined);
     setFehler(undefined);
     (async () => {
-      const [geladen, geloest] = await Promise.all([dienst.alleAntworten(), dienst.loesungen()]);
-      // Offene Antworten automatisch prüfen und das Ergebnis gleich speichern.
-      const alle: IAntwort[] = [];
-      for (const a of geladen) {
-        const vorschlag: Ergebnis | undefined =
-          a.ergebnis === 'offen' ? pruefe(a, geloest.filter(l => l.tag === a.tag)[0]?.loesung) : undefined;
-        if (vorschlag) {
-          await dienst.ergebnisSpeichern(a.id, vorschlag);
-        }
-        alle.push(vorschlag ? { ...a, ergebnis: vorschlag } : a);
-      }
+      const { antworten: alle, loesungen: geloest } = await offeneAuswerten(dienst, testlauf);
       if (aktuell) {
         setLoesungen(geloest);
         setAntworten(alle);
@@ -65,7 +57,7 @@ export default function Auswertung(props: IAuswertungProps): React.ReactElement<
     return () => {
       aktuell = false;
     };
-  }, [offen, dienst]);
+  }, [offen, dienst, testlauf]);
 
   const setze = (antwort: IAntwort, ergebnis: Ergebnis): void => {
     dienst.ergebnisSpeichern(antwort.id, ergebnis).then(
@@ -77,7 +69,7 @@ export default function Auswertung(props: IAuswertungProps): React.ReactElement<
   const tage: number[] = antworten ? antworten.map(a => a.tag).filter((t, i, alle) => alle.indexOf(t) === i).sort((a, b) => a - b) : [];
   const optionen: IDropdownOption[] = tage.map(t => ({
     key: t,
-    text: `${t}. Dezember (${antworten?.filter(a => a.tag === t).length} Antworten)`
+    text: `Türchen ${t} (${antworten?.filter(a => a.tag === t).length} Antworten)`
   }));
   const desTages: IAntwort[] = antworten?.filter(a => a.tag === tag) ?? [];
   const richtige: IAntwort[] = desTages.filter(a => a.ergebnis === 'richtig');
@@ -88,6 +80,11 @@ export default function Auswertung(props: IAuswertungProps): React.ReactElement<
       {fehler && <MessageBar messageBarType={MessageBarType.error}>{fehler}</MessageBar>}
       {!antworten && !fehler && <Spinner label="Antworten werden geladen und geprüft …" />}
       {antworten && antworten.length === 0 && <p>Es sind noch keine Antworten eingegangen.</p>}
+      {testlauf && (
+        <MessageBar messageBarType={MessageBarType.info}>
+          Vorschau ist eingeschaltet: Antworten werden ohne Datumsprüfung bewertet. Zum echten Start die Vorschau ausschalten.
+        </MessageBar>
+      )}
       {antworten && antworten.length > 0 && (
         <>
           <Dropdown
@@ -115,7 +112,7 @@ export default function Auswertung(props: IAuswertungProps): React.ReactElement<
               <tr style={{ textAlign: 'left', borderBottom: '2px solid #c8c6c4' }}>
                 <th style={{ padding: 6 }}>Name</th>
                 <th style={{ padding: 6 }}>Antwort</th>
-                <th style={{ padding: 6 }}>Zeit</th>
+                <th style={{ padding: 6 }}>Uhrzeit</th>
                 <th style={{ padding: 6 }}>Ergebnis</th>
                 <th style={{ padding: 6 }} />
               </tr>
