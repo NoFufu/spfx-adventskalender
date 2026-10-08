@@ -1,0 +1,870 @@
+// Adventskalender im Geschenk-Look. Drei Designs, umschaltbar direkt im Webpart (Bearbeitungsmodus) oder in den Einstellungen:
+// Winternacht (dunkel, Laternengold), IHK (IHK-Blau mit warmem Gold) und Klassisch (Rot/Grün/Gold auf Creme).
+// Jedes Türchen bekommt eine eigene Verpackung (siehe logic/verpackung.ts); Bandlage, Zahl und Schleife kommen als CSS-Variablen.
+// Ausgelegt für Desktop-Seiten; auf schmalen Flächen gibt es nur ein einfaches Ersatzraster.
+
+$serif: Georgia, 'Times New Roman', serif;
+
+// ---------- Designs ----------
+
+.winternacht {
+  --hintergrund: radial-gradient(ellipse at 15% 0%, rgba(243, 182, 106, 0.10), transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(224, 87, 112, 0.10), transparent 50%),
+    linear-gradient(180deg, #1d1527, #120e16);
+  --schnee: 0.35;
+  --titel: #f7efe7;
+  --akzent: #f3b66a;
+  --akzent-text: #2a1a10;
+  --papier0: #6a2133, #3d1220;
+  --papier1: #24493f, #14291f;
+  --papier2: #26355c, #161e36;
+  --papier3: #4a2b56, #2a1832;
+  --papier-gross: #7a2236, #3d1220;
+  --band0: #e9b866;
+  --band0-d: #b8863a;
+  --band1: #f4ece0;
+  --band1-d: #c9bba6;
+  --band2: #d9dde3;
+  --band2-d: #9aa2ad;
+  --zahl: #fff3df;
+  --rand: rgba(247, 239, 231, 0.10);
+  --schatten: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+// Warmes IHK-Design: tiefes IHK-Blau statt Weiß, dazu Gold, Creme und Rot wie Kerzenlicht.
+.ihk {
+  --hintergrund: radial-gradient(ellipse at 12% 0%, rgba(242, 177, 82, 0.22), transparent 55%),
+    radial-gradient(ellipse at 88% 100%, rgba(214, 96, 64, 0.16), transparent 50%),
+    linear-gradient(180deg, #0f2e57, #0a1f3d);
+  --schnee: 0.28;
+  --titel: #fbf1df;
+  --akzent: #f2b552;
+  --akzent-text: #1f1608;
+  --papier0: #0a6bb8, #054f8c;
+  --papier1: #f6ecd8, #e6d5b3;
+  --muster1: rgba(0, 80, 150, 0.16);
+  --zahl1: #0b3a6e;
+  --papier2: #1d4f86, #12355e;
+  --papier3: #c9733a, #9c5224;
+  --papier-gross: #0a6bb8, #0b3a6e;
+  --band0: #f2c46d;
+  --band0-d: #c4913a;
+  --band1: #fbf1df;
+  --band1-d: #d8c6a4;
+  --band2: #d2493f;
+  --band2-d: #a3302a;
+  --zahl: #fff6e6;
+  --rand: rgba(251, 241, 223, 0.12);
+  --schatten: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.klassisch {
+  --hintergrund: radial-gradient(ellipse at 50% 0%, rgba(199, 154, 59, 0.12), transparent 60%),
+    linear-gradient(180deg, #fbf6ec, #f1e7d4);
+  --schnee: 0;
+  --titel: #6e1420;
+  --akzent: #9b2230;
+  --akzent-text: #fffaf0;
+  --papier0: #b3202e, #861622;
+  --papier1: #2e6b3f, #1f4d2c;
+  --papier2: #8a6a24, #6b5018;
+  --papier3: #7d1d3f, #5a132d;
+  --papier-gross: #b3202e, #6e1420;
+  --band0: #fff1c9;
+  --band0-d: #d6b86e;
+  --band1: #e2b04a;
+  --band1-d: #a87a22;
+  --band2: #eef0f2;
+  --band2-d: #aeb4bb;
+  --zahl: #fffaf0;
+  --rand: rgba(110, 20, 32, 0.15);
+  --schatten: 0 6px 16px rgba(80, 40, 10, 0.22);
+}
+
+// ---------- Rahmen und Kopf ----------
+
+.adventskalender {
+  container-type: inline-size;
+  position: relative;
+  overflow: hidden;
+  padding: 20px 28px 24px;
+  border-radius: 16px;
+  border: 1px solid var(--rand);
+  background: var(--hintergrund);
+  color: var(--titel);
+
+  // Leiser Schneefall als Muster im Hintergrund (Winternacht und IHK).
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: var(--schnee);
+    background-image:
+      radial-gradient(circle, rgba(247, 239, 231, 0.7) 1px, transparent 1.5px),
+      radial-gradient(circle, rgba(247, 239, 231, 0.45) 1px, transparent 1.5px);
+    background-size: 120px 120px, 70px 70px;
+    background-position: 0 0, 35px 45px;
+  }
+}
+
+.kopf {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.titel {
+  margin: 0;
+  font-family: $serif;
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--titel);
+}
+
+.untertitel {
+  margin: 2px 0 0;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--akzent);
+}
+
+.vorschauHinweis {
+  padding: 4px 12px;
+  border: 1px solid var(--akzent);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--akzent);
+  white-space: nowrap;
+}
+
+.kopfRechts {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+// Design-Umschalter im Kopf, nur im Bearbeitungsmodus sichtbar.
+.designWahl {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--rand);
+  border-radius: 999px;
+  background: rgba(127, 127, 127, 0.12);
+}
+
+.designKnopf {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 5px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--titel);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(127, 127, 127, 0.18);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--akzent);
+    outline-offset: 2px;
+  }
+}
+
+.designAktiv,
+.designAktiv:hover {
+  background: var(--akzent);
+  color: var(--akzent-text);
+}
+
+.designFarbe {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.redaktionsHinweis {
+  position: relative;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--akzent);
+  border-radius: 10px;
+  color: var(--titel);
+  font-size: 0.9rem;
+}
+
+// ---------- Raster ----------
+
+.raster {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  // Reihenhöhe so wählen, dass der ganze Kalender (Kopf + 5 Reihen) in die Bildschirmhöhe passt.
+  grid-auto-rows: clamp(60px, min(10.5cqi, calc((100vh - 220px) / 5)), 170px);
+  gap: 10px;
+}
+
+// Schmale Flächen: einfaches Raster ohne feste Plätze.
+@container (max-width: 640px) {
+  .raster {
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 22cqi;
+  }
+
+  .tuerchen {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}
+
+// ---------- Türchen als Geschenk ----------
+
+.tuerchen {
+  --b: clamp(8px, 1.3cqi, 16px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  color: var(--zahl);
+  font: inherit;
+  cursor: pointer;
+  box-shadow: var(--schatten), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  transition: transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 320ms ease;
+
+  // Lichtstreifen, der beim Hovern über das Papier gleitet.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    z-index: 2;
+    background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.28) 48%, rgba(255, 255, 255, 0.08) 54%, transparent 62%);
+    transform: translateX(-110%);
+    pointer-events: none;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--akzent);
+    outline-offset: 3px;
+  }
+}
+
+// Papierfarbe (aus dem Platz) und Muster (aus der Verpackung) sind getrennt, so entstehen mehr Kombinationen.
+.farbe0 { --papier: var(--papier0); --muster: var(--muster0, rgba(255, 255, 255, 0.10)); --zahl-farbe: var(--zahl0, var(--zahl)); }
+.farbe1 { --papier: var(--papier1); --muster: var(--muster1, rgba(255, 255, 255, 0.12)); --zahl-farbe: var(--zahl1, var(--zahl)); }
+.farbe2 { --papier: var(--papier2); --muster: var(--muster2, rgba(255, 255, 255, 0.10)); --zahl-farbe: var(--zahl2, var(--zahl)); }
+.farbe3 { --papier: var(--papier3); --muster: var(--muster3, rgba(255, 255, 255, 0.12)); --zahl-farbe: var(--zahl3, var(--zahl)); }
+
+// Streifen, Punkte, Karo, Sterne, feine Linien
+.muster0 { background: repeating-linear-gradient(45deg, var(--muster) 0 6px, transparent 6px 18px), linear-gradient(155deg, var(--papier)); }
+.muster1 { background: radial-gradient(circle, var(--muster) 1.5px, transparent 2.5px) 0 0 / 14px 14px, linear-gradient(155deg, var(--papier)); }
+.muster2 {
+  background: linear-gradient(90deg, var(--muster) 50%, transparent 50%) 0 0 / 22px 22px,
+    linear-gradient(var(--muster) 50%, transparent 50%) 0 0 / 22px 22px, linear-gradient(155deg, var(--papier));
+}
+.muster3 {
+  background: radial-gradient(circle, var(--muster) 1.2px, transparent 2px) 0 0 / 26px 26px,
+    radial-gradient(circle, var(--muster) 1px, transparent 1.6px) 13px 13px / 26px 26px, linear-gradient(155deg, var(--papier));
+}
+.muster4 { background: repeating-linear-gradient(90deg, var(--muster) 0 2px, transparent 2px 11px), linear-gradient(155deg, var(--papier)); }
+
+.start,
+.finale {
+  --zahl-farbe: var(--zahl);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.16) 1.2px, transparent 2px) 0 0 / 30px 30px,
+    radial-gradient(ellipse at 60% 60%, rgba(255, 255, 255, 0.12), transparent 65%), linear-gradient(155deg, var(--papier-gross));
+}
+
+// Bandfarben pro Türchen
+.band0 { --band: var(--band0); --band-dunkel: var(--band0-d); }
+.band1 { --band: var(--band1); --band-dunkel: var(--band1-d); }
+.band2 { --band: var(--band2); --band-dunkel: var(--band2-d); }
+
+// Innerer Rahmen, sichtbar sobald das Geschenk ausgepackt ist.
+.rahmen {
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.geoeffnet .rahmen {
+  opacity: 1;
+}
+
+// Geschenkband: Lage pro Türchen über --band-x und --band-y, die Zahl liegt auf der freien Seite.
+.geschenk {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bandSenkrecht,
+.bandWaagerecht {
+  position: absolute;
+  background: linear-gradient(90deg, var(--band-dunkel), var(--band) 30%, var(--band) 70%, var(--band-dunkel));
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
+  transition: transform 450ms cubic-bezier(0.5, 0, 0.75, 0), opacity 450ms ease;
+}
+
+.bandSenkrecht {
+  top: 0;
+  bottom: 0;
+  left: var(--band-x);
+  width: var(--b);
+  margin-left: calc(var(--b) / -2);
+  transform-origin: top;
+}
+
+.bandWaagerecht {
+  left: 0;
+  right: 0;
+  top: var(--band-y);
+  height: var(--b);
+  margin-top: calc(var(--b) / -2);
+  background: linear-gradient(180deg, var(--band-dunkel), var(--band) 30%, var(--band) 70%, var(--band-dunkel));
+  transform-origin: left;
+}
+
+.schleife {
+  position: absolute;
+  left: var(--band-x);
+  top: var(--band-y);
+  width: clamp(40px, 6cqi, 84px);
+  height: auto;
+  fill: var(--band);
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+  transform: translate(-50%, -55%) rotate(var(--dreh));
+  transform-origin: 50% 55%;
+  transition: transform 500ms ease, opacity 500ms ease;
+}
+
+.schleifeEnde {
+  fill: var(--band-dunkel);
+}
+
+.schleifeSchatten {
+  fill: rgba(0, 0, 0, 0.18);
+}
+
+.rosette {
+  width: clamp(34px, 4.6cqi, 64px);
+}
+
+.start .schleife,
+.finale .schleife {
+  width: clamp(64px, 9.5cqi, 130px);
+}
+
+.start .rosette,
+.finale .rosette {
+  width: clamp(54px, 7.5cqi, 104px);
+}
+
+// Hover: die Schleife wackelt.
+@keyframes wackeln {
+  0%, 100% { transform: translate(-50%, -55%) rotate(var(--dreh)) scale(1.1); }
+  20% { transform: translate(-50%, -55%) rotate(calc(var(--dreh) - 12deg)) scale(1.1); }
+  40% { transform: translate(-50%, -55%) rotate(calc(var(--dreh) + 10deg)) scale(1.1); }
+  60% { transform: translate(-50%, -55%) rotate(calc(var(--dreh) - 6deg)) scale(1.1); }
+  80% { transform: translate(-50%, -55%) rotate(calc(var(--dreh) + 3deg)) scale(1.1); }
+}
+
+.offen:hover {
+  z-index: 3;
+  transform: translateY(-6px) scale(1.035) rotate(calc(var(--dreh, 0deg) * 0.06));
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.42), 0 0 0 2px var(--akzent), 0 0 26px -2px var(--akzent);
+
+  &::before {
+    transform: translateX(110%);
+    transition: transform 850ms ease;
+  }
+
+  .schleife {
+    animation: wackeln 700ms ease-in-out infinite;
+  }
+
+  .etikett {
+    transition: transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+.offen.mitAnhaenger:hover .etikett {
+  transform: translateX(-50%) rotate(calc(var(--dreh) * -0.5));
+  animation: pendeln 900ms ease-in-out infinite;
+}
+
+.offen:hover .faden {
+  animation: fadenPendeln 900ms ease-in-out infinite;
+}
+
+@keyframes fadenPendeln {
+  0%, 100% { transform: rotate(calc(var(--dreh) * -0.5)); }
+  30% { transform: rotate(calc(var(--dreh) * -0.5 + 9deg)); }
+  65% { transform: rotate(calc(var(--dreh) * -0.5 - 7deg)); }
+}
+
+// Gesperrte Türchen rütteln kurz: noch zu!
+@keyframes ruetteln {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-3px) rotate(-0.6deg); }
+  40% { transform: translateX(3px) rotate(0.6deg); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(1px); }
+}
+
+.gesperrt:hover {
+  animation: ruetteln 420ms ease-in-out;
+}
+
+// Öffnen: das Band löst sich, die Schleife fliegt weg.
+.loest {
+  .schleife {
+    animation: none;
+    transform: translate(-50%, -140%) rotate(calc(var(--dreh) + 35deg)) scale(1.3);
+    opacity: 0;
+  }
+
+  .bandSenkrecht {
+    transform: translateY(105%);
+    opacity: 0;
+  }
+
+  .bandWaagerecht {
+    transform: translateX(105%);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tuerchen,
+  .schleife,
+  .bandSenkrecht,
+  .bandWaagerecht {
+    transition: none;
+  }
+
+  .offen:hover {
+    transform: none;
+
+    &::before {
+      transition: none;
+    }
+
+    .schleife,
+    .faden,
+    .etikett {
+      animation: none !important;
+    }
+  }
+
+  .gesperrt:hover,
+  .funkeln,
+  .finale,
+  .dekoKugel,
+  .dekoStern {
+    animation: none !important;
+  }
+}
+
+// ---------- Zahl und Beschriftung ----------
+
+// Zahl und Beschriftung sitzen gemeinsam an --zahl-x / --zahl-y, gegenüber der Schleife.
+.etikett {
+  position: absolute;
+  left: var(--zahl-x);
+  top: var(--zahl-y);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translate(-50%, -50%);
+  color: var(--zahl-farbe);
+  white-space: nowrap;
+}
+
+.zahl {
+  font-family: $serif;
+  font-size: clamp(1.5rem, 3.2cqi, 2.6rem);
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.start .zahl {
+  font-size: clamp(2.8rem, 7cqi, 5.5rem);
+}
+
+.finale .zahl {
+  font-size: clamp(3.2rem, 8.5cqi, 7rem);
+}
+
+.klein {
+  // Standardgröße ohne Besonderheiten.
+  min-height: 0;
+}
+
+.hoch .zahl,
+.breit .zahl {
+  font-size: clamp(1.8rem, 4cqi, 3.2rem);
+}
+
+.beschriftung {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+// Geschenkanhänger: ein Kärtchen mit der Zahl hängt an einem Faden unter der Schleife auf dem Band.
+.faden {
+  position: absolute;
+  left: var(--band-x);
+  top: var(--band-y);
+  width: 2px;
+  height: 28px;
+  margin-left: -1px;
+  background: rgba(60, 40, 20, 0.75);
+  transform: rotate(calc(var(--dreh) * -0.5));
+  transform-origin: top;
+}
+
+.mitAnhaenger .etikett {
+  left: var(--band-x);
+  top: calc(var(--band-y) + 26px);
+  padding: 14px 10px 6px;
+  border-radius: 2px 2px 5px 5px;
+  background: linear-gradient(180deg, #fffaf0, #efe2c8);
+  color: #3a2a1c;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  clip-path: polygon(28% 0, 72% 0, 100% 20%, 100% 100%, 0 100%, 0 20%);
+  transform: translateX(-50%) rotate(calc(var(--dreh) * -0.5));
+  transform-origin: 50% -26px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 5px;
+    width: 6px;
+    height: 6px;
+    margin-left: -3px;
+    border-radius: 50%;
+    background: rgba(58, 42, 28, 0.55);
+  }
+
+  .zahl {
+    font-size: clamp(1.1rem, 2.2cqi, 1.8rem);
+    text-shadow: none;
+  }
+}
+
+.mitAnhaenger.hoch .etikett .zahl,
+.mitAnhaenger.breit .etikett .zahl {
+  font-size: clamp(1.3rem, 2.6cqi, 2.1rem);
+}
+
+@keyframes pendeln {
+  0%, 100% { transform: translateX(-50%) rotate(calc(var(--dreh) * -0.5)); }
+  30% { transform: translateX(-50%) rotate(calc(var(--dreh) * -0.5 + 9deg)); }
+  65% { transform: translateX(-50%) rotate(calc(var(--dreh) * -0.5 - 7deg)); }
+}
+
+// Ausgepackt: Zahl in die Mitte.
+.geoeffnet .etikett {
+  left: 50%;
+  top: 50%;
+  width: 86%;
+  white-space: normal;
+  text-align: center;
+}
+
+// Titel des Inhalts auf dem geöffneten Türchen, höchstens zwei Zeilen.
+.inhaltTitel {
+  display: -webkit-box;
+  max-width: 100%;
+  margin-top: 4px;
+  overflow: hidden;
+  font-size: clamp(0.72rem, 1cqi, 0.95rem);
+  line-height: 1.25;
+  opacity: 0.92;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.start .inhaltTitel,
+.finale .inhaltTitel {
+  font-size: clamp(0.9rem, 1.5cqi, 1.3rem);
+}
+
+.countdown {
+  position: absolute;
+  bottom: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+  font-size: 0.7rem;
+  color: #fff;
+}
+
+// ---------- Zustände ----------
+
+.gesperrt {
+  cursor: default;
+  filter: saturate(0.7) brightness(0.88);
+}
+
+.heute {
+  box-shadow: 0 0 0 3px var(--akzent), 0 0 28px var(--akzent);
+}
+
+.heuteMarke {
+  position: absolute;
+  top: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--akzent);
+  color: var(--akzent-text);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+// Ausgepackt: Papier ohne Band, leicht abgedunkelt, mit Lichtspalt.
+.geoeffnet {
+  box-shadow: var(--schatten), inset -4px 0 0 rgba(255, 255, 255, 0.35), inset -16px 0 20px -14px rgba(255, 255, 255, 0.4);
+
+  // Geöffnete Schachtel: dunkle Mulde mit warmem Licht von innen.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px dashed rgba(255, 255, 255, 0.28);
+    border-radius: 7px;
+    background: radial-gradient(ellipse at 50% 35%, rgba(255, 236, 190, 0.22), rgba(0, 0, 0, 0.38) 78%);
+    box-shadow: inset 0 6px 16px rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+  }
+
+  .etikett {
+    z-index: 1;
+  }
+}
+
+// ---------- Dialog-Inhalt ----------
+
+.bild {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 0.75em;
+}
+
+.text {
+  margin: 0 0 0.75em;
+  font-size: 1rem;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.link {
+  font-weight: 600;
+}
+
+// ---------- Wochenende: zwei halbe Türchen in einer Zelle ----------
+
+.doppelt {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 6px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.halb {
+  --b: clamp(5px, 0.8cqi, 9px);
+  border-radius: 8px;
+
+  .schleife {
+    width: clamp(22px, 2.6cqi, 34px);
+  }
+
+  .etikett {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .zahl {
+    font-size: clamp(1rem, 1.9cqi, 1.5rem);
+  }
+
+  .countdown {
+    bottom: 4px;
+    padding: 0 5px;
+    font-size: 0.6rem;
+  }
+
+  &.geoeffnet::after {
+    inset: 4px;
+  }
+}
+
+.offen.halb:hover {
+  transform: translateY(-3px) scale(1.04);
+}
+
+// ---------- Türchen 24: goldenes Hauptgeschenk ----------
+
+.tuerchen.finale {
+  --b: clamp(16px, 2.2cqi, 28px);
+  --band: #b3202e;
+  --band-dunkel: #741219;
+  --zahl-farbe: #5e1212;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 1px, transparent 2px) 0 0 / 34px 34px,
+    linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.35) 45%, transparent 60%),
+    linear-gradient(135deg, #a8771f, #f0cc6e 28%, #c99a3e 52%, #f7e2a0 74%, #9e6f1c);
+  border-color: rgba(255, 236, 170, 0.6);
+
+  .bandSenkrecht {
+    background: linear-gradient(90deg, var(--band-dunkel), var(--band) 15%, var(--band) 36%, #f6d77f 38% 43%,
+      var(--band) 45% 55%, #f6d77f 57% 62%, var(--band) 64%, var(--band) 85%, var(--band-dunkel));
+  }
+
+  .bandWaagerecht {
+    background: linear-gradient(180deg, var(--band-dunkel), var(--band) 15%, var(--band) 36%, #f6d77f 38% 43%,
+      var(--band) 45% 55%, #f6d77f 57% 62%, var(--band) 64%, var(--band) 85%, var(--band-dunkel));
+  }
+
+  .zahl {
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55), 0 3px 10px rgba(120, 70, 0, 0.35);
+  }
+
+  .beschriftung {
+    font-weight: 700;
+    opacity: 1;
+  }
+
+  &.geoeffnet {
+    --zahl-farbe: #fff6e0;
+  }
+}
+
+@keyframes leuchten {
+  0%, 100% { box-shadow: var(--schatten), 0 0 18px rgba(246, 215, 127, 0.35); }
+  50% { box-shadow: var(--schatten), 0 0 38px rgba(246, 215, 127, 0.75); }
+}
+
+.finale.gesperrt,
+.finale.offen:not(:hover) {
+  animation: leuchten 3.2s ease-in-out infinite;
+}
+
+.funkeln {
+  position: absolute;
+  z-index: 1;
+  background: #fffbe8;
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+  transform: translate(-50%, -50%) scale(0.3);
+  opacity: 0;
+  pointer-events: none;
+  animation: funkeln 2.6s ease-in-out infinite;
+}
+
+@keyframes funkeln {
+  0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(0deg); }
+  45% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(45deg); }
+  70% { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(90deg); }
+}
+
+// ---------- Dekoration auf freien Plätzen ----------
+
+// Wie ein Türchen: gleiche Kanten, Schatten und Papier, nur mit Kugel statt Zahl.
+.deko {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.10) 1px, transparent 1.6px) 0 0 / 18px 18px,
+    radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.12), transparent 70%),
+    linear-gradient(155deg, var(--papier-gross));
+  box-shadow: var(--schatten), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+.dekoHalb {
+  border-radius: 8px;
+}
+
+.dekoKugel {
+  height: 78%;
+  fill: var(--band0);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+  transform-origin: 50% 0;
+  animation: kugelPendeln 4s ease-in-out infinite;
+}
+
+.dekoHalb .dekoKugel {
+  height: 92%;
+}
+
+.dekoFaden {
+  stroke: var(--band0);
+  stroke-width: 1.2;
+}
+
+.dekoKappe {
+  fill: #d9d4c8;
+}
+
+.dekoLinie {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 1.5;
+}
+
+.dekoGlanz {
+  fill: rgba(255, 255, 255, 0.5);
+}
+
+@keyframes kugelPendeln {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+
+.dekoStern {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #fffbe8;
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+  animation: funkeln 3s ease-in-out infinite;
+
+  &:nth-of-type(1) { left: 18%; top: 30%; }
+  &:nth-of-type(2) { left: 80%; top: 22%; animation-delay: 1s; }
+  &:nth-of-type(3) { left: 72%; top: 75%; animation-delay: 2s; }
+}
