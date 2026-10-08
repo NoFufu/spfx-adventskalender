@@ -20,9 +20,12 @@
     "group": { "default": "Advanced" },
     "title": { "default": "Adventskalender" },
     "description": { "default": "Adventskalender mit 24 Türchen" },
-    "officeFabricIconFontName": "Page",
+    "officeFabricIconFontName": "Calendar",
     "properties": {
-      "description": "Adventskalender"
+      "titel": "Adventskalender",
+      "jahr": "",
+      "gemischt": true,
+      "vorschau": false
     }
   }]
 }

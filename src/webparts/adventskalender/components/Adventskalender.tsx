@@ -1,44 +1,58 @@
 import * as React from 'react';
+import { Dialog, DialogType, Link } from '@fluentui/react';
 import styles from './Adventskalender.module.scss';
 import type { IAdventskalenderProps } from './IAdventskalenderProps';
-import { escape } from '@microsoft/sp-lodash-subset';
-import welcomeDark from '../assets/welcome-dark.png';
-import welcomeLight from '../assets/welcome-light.png';
+import type { ITuerchenInhalt } from '../logic/ITuerchenInhalt';
+import { ANZAHL_TUERCHEN, gemischteReihenfolge, istOffen, tageBisOffen } from '../logic/freischaltung';
+import Tuerchen from './Tuerchen';
 
-export default class Adventskalender extends React.Component<IAdventskalenderProps> {
-  public render(): React.ReactElement<IAdventskalenderProps> {
-    const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      userDisplayName
-    } = this.props;
+export default function Adventskalender(props: IAdventskalenderProps): React.ReactElement<IAdventskalenderProps> {
+  const { titel, jahr, gemischt, vorschau, inhalte } = props;
+  const jetzt: Date = props.jetzt ?? new Date();
+  const [offenerTag, setOffenerTag] = React.useState<number | undefined>(undefined);
 
-    return (
-      <section className={`${styles.adventskalender}`}>
-        <div className={styles.welcome}>
-          <img alt="" src={isDarkTheme ? welcomeDark : welcomeLight} className={styles.welcomeImage} />
-          <h2>Well done, {escape(userDisplayName)}!</h2>
-          <div>{environmentMessage}</div>
-          <div>Web part property value: <strong>{escape(description)}</strong></div>
-        </div>
-        <div>
-          <h3>Welcome to SharePoint Framework!</h3>
-          <p>
-            The SharePoint Framework (SPFx) is a extensibility model for Microsoft Viva, Microsoft Teams and SharePoint. It&#39;s the easiest way to extend Microsoft 365 with automatic Single Sign On, automatic hosting and industry standard tooling.
-          </p>
-          <h4>Learn more about SPFx development:</h4>
-          <ul className={styles.links}>
-            <li><a href="https://aka.ms/spfx" target="_blank" rel="noreferrer">SharePoint Framework Overview</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-graph" target="_blank" rel="noreferrer">Use Microsoft Graph in your solution</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-teams" target="_blank" rel="noreferrer">Build for Microsoft Teams using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-viva" target="_blank" rel="noreferrer">Build for Microsoft Viva Connections using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-store" target="_blank" rel="noreferrer">Publish SharePoint Framework applications to the marketplace</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-api" target="_blank" rel="noreferrer">SharePoint Framework API reference</a></li>
-            <li><a href="https://aka.ms/m365pnp" target="_blank" rel="noreferrer">Microsoft 365 Developer Community</a></li>
-          </ul>
-        </div>
-      </section>
-    );
-  }
+  const reihenfolge: number[] = React.useMemo(
+    () => (gemischt ? gemischteReihenfolge(jahr) : Array.from({ length: ANZAHL_TUERCHEN }, (_, i) => i + 1)),
+    [gemischt, jahr]
+  );
+
+  const inhalt: ITuerchenInhalt | undefined =
+    offenerTag === undefined ? undefined : inhalte.filter(i => i.tag === offenerTag)[0];
+
+  return (
+    <section className={styles.adventskalender}>
+      {titel && <h2 className={styles.titel}>{titel}</h2>}
+      {vorschau && <p className={styles.vorschauHinweis}>Vorschau: alle Türchen sind offen.</p>}
+      <div className={styles.raster}>
+        {reihenfolge.map(tag => (
+          <Tuerchen
+            key={tag}
+            tag={tag}
+            offen={vorschau || istOffen(tag, jahr, jetzt)}
+            tageBisOffen={tageBisOffen(tag, jahr, jetzt)}
+            onOeffnen={setOffenerTag}
+          />
+        ))}
+      </div>
+      <Dialog
+        hidden={offenerTag === undefined}
+        onDismiss={() => setOffenerTag(undefined)}
+        dialogContentProps={{
+          type: DialogType.close,
+          title: inhalt?.titel ?? `${offenerTag}. Dezember`,
+          closeButtonAriaLabel: 'Schließen'
+        }}
+        minWidth={320}
+        maxWidth={560}
+      >
+        {inhalt?.bildUrl && <img className={styles.bild} src={inhalt.bildUrl} alt="" />}
+        <p className={styles.text}>{inhalt?.text ?? 'Für diesen Tag gibt es noch keinen Inhalt.'}</p>
+        {inhalt?.linkUrl && (
+          <Link href={inhalt.linkUrl} target="_blank" rel="noreferrer">
+            Mehr dazu
+          </Link>
+        )}
+      </Dialog>
+    </section>
+  );
 }

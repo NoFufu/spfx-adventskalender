@@ -1,29 +1,107 @@
+// Erste Fassung des Designs: Winternacht mit Laternengold, angelehnt an DESIGN.md der Glühwein-Tour.
+// Feinschliff (Animation, Theme-Varianten) folgt in Schritt 3.
+$nacht: #120e16;
+$tuer: #1a141e;
+$gold: #f3b66a;
+$creme: #f7efe7;
+$gedaempft: #d2c6cc;
+
 .adventskalender {
-  overflow: hidden;
   padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
+  border-radius: 12px;
+  background: $nacht;
+  color: $creme;
 }
 
-.welcome {
-  text-align: center;
+.titel {
+  margin: 0 0 0.75em;
+  font-size: 1.5em;
+  font-weight: 600;
 }
 
-.welcomeImage {
-  width: 100%;
-  max-width: 420px;
+.vorschauHinweis {
+  margin: 0 0 0.75em;
+  color: $gold;
+  font-size: 0.875em;
 }
 
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
+.raster {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 
-    &:hover {
-      text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
-    }
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(4, 1fr);
   }
+
+  @media (min-width: 800px) {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.tuerchen {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid rgba($creme, 0.12);
+  border-radius: 10px;
+  background: $tuer;
+  color: $creme;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 150ms ease, border-color 150ms ease;
+
+  &:focus-visible {
+    outline: 2px solid $gold;
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.offen {
+  border-color: rgba($gold, 0.6);
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: $gold;
+  }
+
+  .zahl {
+    color: $gold;
+  }
+}
+
+.gesperrt {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.zahl {
+  font-size: 1.75em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.countdown {
+  font-size: 0.75em;
+  color: $gedaempft;
+}
+
+.bild {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 0.75em;
+}
+
+.text {
+  margin: 0 0 0.75em;
+  white-space: pre-line;
 }

@@ -1,16 +1,12 @@
 declare interface IAdventskalenderWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
-  DescriptionFieldLabel: string;
-  AppLocalEnvironmentSharePoint: string;
-  AppLocalEnvironmentTeams: string;
-  AppLocalEnvironmentOffice: string;
-  AppLocalEnvironmentOutlook: string;
-  AppSharePointEnvironment: string;
-  AppTeamsTabEnvironment: string;
-  AppOfficeEnvironment: string;
-  AppOutlookEnvironment: string;
-  UnknownEnvironment: string;
+  TitelFieldLabel: string;
+  JahrFieldLabel: string;
+  JahrFieldDescription: string;
+  JahrFieldError: string;
+  GemischtFieldLabel: string;
+  VorschauFieldLabel: string;
 }
 
 declare module 'AdventskalenderWebPartStrings' {
