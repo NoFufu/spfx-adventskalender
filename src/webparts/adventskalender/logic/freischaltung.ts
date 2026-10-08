@@ -29,16 +29,13 @@ export function tageBisOffen(tag: number, jahr: number, jetzt: Date): number {
 }
 
 /**
- * Feste, aber gemischte Anordnung der Türchen. Gleiches Jahr ergibt immer dieselbe Reihenfolge,
- * damit die Türchen beim Neuladen nicht springen.
+ * Mischt eine Liste in einer festen, aber zufällig wirkenden Reihenfolge. Gleicher Startwert
+ * (das Jahr) ergibt immer dieselbe Reihenfolge, damit die Türchen beim Neuladen nicht springen.
  */
-export function gemischteReihenfolge(jahr: number): number[] {
-  const tage: number[] = [];
-  for (let tag: number = 1; tag <= ANZAHL_TUERCHEN; tag++) {
-    tage.push(tag);
-  }
-  // Einfacher deterministischer Zufallsgenerator (mulberry32), Startwert = Jahr.
-  let zustand: number = jahr >>> 0;
+export function mischen<T>(liste: T[], startwert: number): T[] {
+  const ergebnis: T[] = liste.slice();
+  // Einfacher deterministischer Zufallsgenerator (mulberry32).
+  let zustand: number = startwert >>> 0;
   const zufall = (): number => {
     zustand = (zustand + 0x6d2b79f5) >>> 0;
     let t: number = zustand;
@@ -46,11 +43,24 @@ export function gemischteReihenfolge(jahr: number): number[] {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  for (let i: number = tage.length - 1; i > 0; i--) {
+  for (let i: number = ergebnis.length - 1; i > 0; i--) {
     const j: number = Math.floor(zufall() * (i + 1));
-    const tmp: number = tage[i];
-    tage[i] = tage[j];
-    tage[j] = tmp;
+    const tmp: T = ergebnis[i];
+    ergebnis[i] = ergebnis[j];
+    ergebnis[j] = tmp;
   }
-  return tage;
+  return ergebnis;
+}
+
+/** Kurzer Hinweis unter der Überschrift, z. B. "Noch 5 Tage bis Heiligabend". */
+export function adventsHinweis(jahr: number, jetzt: Date): string {
+  if (!istOffen(1, jahr, jetzt)) {
+    const tage: number = tageBisOffen(1, jahr, jetzt);
+    return tage === 1 ? 'Morgen öffnet sich das erste Türchen' : `Noch ${tage} Tage bis zum ersten Türchen`;
+  }
+  if (!istOffen(ANZAHL_TUERCHEN, jahr, jetzt)) {
+    const tage: number = tageBisOffen(ANZAHL_TUERCHEN, jahr, jetzt);
+    return tage === 1 ? 'Morgen ist Heiligabend' : `Noch ${tage} Tage bis Heiligabend`;
+  }
+  return 'Frohe Weihnachten!';
 }

@@ -31,7 +31,8 @@ export default class AdventskalenderWebPart extends BaseClientSideWebPart<IAdven
         jahr: this._jahr(),
         gemischt: !!this.properties.gemischt,
         vorschau: !!this.properties.vorschau,
-        inhalte: beispielInhalte()
+        inhalte: beispielInhalte(),
+        speicherSchluessel: `adventskalender-${this.context.instanceId}-${this._jahr()}`
       }
     );
 

@@ -1,7 +1,8 @@
 import {
   ANZAHL_TUERCHEN,
-  gemischteReihenfolge,
+  adventsHinweis,
   istOffen,
+  mischen,
   tageBisOffen
 } from './freischaltung';
 
@@ -41,15 +42,32 @@ describe('tageBisOffen', () => {
   });
 });
 
-describe('gemischteReihenfolge', () => {
-  it('enthält jeden Tag genau einmal', () => {
-    const reihenfolge: number[] = gemischteReihenfolge(2026);
-    expect([...reihenfolge].sort((a, b) => a - b)).toEqual(
-      Array.from({ length: ANZAHL_TUERCHEN }, (_, i) => i + 1)
-    );
+describe('mischen', () => {
+  const tage: number[] = Array.from({ length: ANZAHL_TUERCHEN }, (_, i) => i + 1);
+
+  it('enthält jeden Eintrag genau einmal', () => {
+    expect([...mischen(tage, 2026)].sort((a, b) => a - b)).toEqual(tage);
   });
 
-  it('ist für dasselbe Jahr stabil', () => {
-    expect(gemischteReihenfolge(2026)).toEqual(gemischteReihenfolge(2026));
+  it('ist für denselben Startwert stabil und ändert die Eingabe nicht', () => {
+    const kopie: number[] = tage.slice();
+    expect(mischen(tage, 2026)).toEqual(mischen(tage, 2026));
+    expect(tage).toEqual(kopie);
+  });
+});
+
+describe('adventsHinweis', () => {
+  it('zählt vor dem 1. Dezember bis zum ersten Türchen', () => {
+    expect(adventsHinweis(2026, new Date(2026, 10, 28))).toBe('Noch 3 Tage bis zum ersten Türchen');
+    expect(adventsHinweis(2026, new Date(2026, 10, 30))).toBe('Morgen öffnet sich das erste Türchen');
+  });
+
+  it('zählt im Dezember bis Heiligabend', () => {
+    expect(adventsHinweis(2026, new Date(2026, 11, 10))).toBe('Noch 14 Tage bis Heiligabend');
+    expect(adventsHinweis(2026, new Date(2026, 11, 23))).toBe('Morgen ist Heiligabend');
+  });
+
+  it('wünscht ab dem 24. frohe Weihnachten', () => {
+    expect(adventsHinweis(2026, new Date(2026, 11, 24))).toBe('Frohe Weihnachten!');
   });
 });
