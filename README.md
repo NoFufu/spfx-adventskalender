@@ -30,7 +30,7 @@ Die Türchen lesen ihre Inhalte aus einer SharePoint-Liste auf derselben Website
 
 Das Webpart fragt nur Zeilen ab, deren Tag schon offen ist. Wer die Liste direkt öffnet, sieht alle Zeilen; wer das verhindern will, muss die Berechtigungen der Liste einschränken.
 
-Webpart-Einstellungen: Überschrift, Jahr (leer = aktuelles Jahr), gemischte Anordnung, Vorschau (alle Türchen offen, nur zum Testen), Name der Liste.
+Webpart-Einstellungen: Überschrift, Design (Winternacht, IHK, Klassisch), Jahr (leer = aktuelles Jahr), gemischte Anordnung, Vorschau (alle Türchen offen, nur zum Testen), Name der Liste.
 
 ## Auslieferung
 

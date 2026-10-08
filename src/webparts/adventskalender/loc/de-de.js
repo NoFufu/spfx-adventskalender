@@ -2,6 +2,7 @@ define([], function() {
   return {
     "PropertyPaneDescription": "Einstellungen für den Adventskalender",
     "BasicGroupName": "Allgemein",
+    "DesignFieldLabel": "Design",
     "TitelFieldLabel": "Überschrift",
     "JahrFieldLabel": "Jahr",
     "JahrFieldDescription": "Leer lassen für das aktuelle Jahr",

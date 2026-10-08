@@ -1,35 +1,98 @@
-// Winternacht mit Laternengold, angelehnt an DESIGN.md der Glühwein-Tour.
+// Adventskalender im Geschenk-Look. Drei Designs, umschaltbar in den Webpart-Einstellungen:
+// Winternacht (dunkel, Laternengold), IHK (Blau/Weiß, an die IHK-Farben angelehnt) und Klassisch (Rot/Grün/Gold auf Creme).
 // Ausgelegt für Desktop-Seiten; auf schmalen Flächen gibt es nur ein einfaches Ersatzraster.
-$nacht: #120e16;
-$nacht-hell: #1d1527;
-$gold: #f3b66a;
-$gold-hell: #ffd9a0;
-$creme: #f7efe7;
-$gedaempft: #c9bcc4;
+
 $serif: Georgia, 'Times New Roman', serif;
+
+// Muster für das Geschenkpapier, liegen über der Papierfarbe.
+$muster-streifen: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.07) 0 6px, transparent 6px 18px);
+$muster-punkte: radial-gradient(circle, rgba(255, 255, 255, 0.14) 1.5px, transparent 2px);
+$muster-karo: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 50%, transparent 50%),
+  linear-gradient(rgba(255, 255, 255, 0.06) 50%, transparent 50%);
+$muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transparent 1.5px),
+  radial-gradient(circle, rgba(255, 255, 255, 0.10) 1px, transparent 1.5px);
+
+// ---------- Designs ----------
+
+.winternacht {
+  --hintergrund: radial-gradient(ellipse at 15% 0%, rgba(243, 182, 106, 0.10), transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(224, 87, 112, 0.10), transparent 50%),
+    linear-gradient(180deg, #1d1527, #120e16);
+  --schnee: 0.35;
+  --titel: #f7efe7;
+  --akzent: #f3b66a;
+  --gedaempft: #c9bcc4;
+  --papier0: #6a2133, #3d1220;
+  --papier1: #24493f, #14291f;
+  --papier2: #26355c, #161e36;
+  --papier3: #4a2b56, #2a1832;
+  --papier-gross: #7a2236, #3d1220;
+  --band: #e9b866;
+  --band-dunkel: #b8863a;
+  --zahl: #fff3df;
+  --rand: rgba(247, 239, 231, 0.10);
+  --schatten: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.ihk {
+  --hintergrund: linear-gradient(180deg, #ffffff, #eef3f9);
+  --schnee: 0;
+  --titel: #003c71;
+  --akzent: #0069b4;
+  --gedaempft: #d6e4f2;
+  --papier0: #0069b4, #00508c;
+  --papier1: #003c71, #002a52;
+  --papier2: #3d8fd1, #2673b3;
+  --papier3: #5b7086, #3f5368;
+  --papier-gross: #00508c, #002a52;
+  --band: #ffffff;
+  --band-dunkel: #c9d6e4;
+  --zahl: #ffffff;
+  --rand: rgba(0, 60, 113, 0.12);
+  --schatten: 0 6px 16px rgba(0, 40, 80, 0.18);
+}
+
+.klassisch {
+  --hintergrund: radial-gradient(ellipse at 50% 0%, rgba(199, 154, 59, 0.12), transparent 60%),
+    linear-gradient(180deg, #fbf6ec, #f1e7d4);
+  --schnee: 0;
+  --titel: #6e1420;
+  --akzent: #9b2230;
+  --gedaempft: #f3e6cc;
+  --papier0: #b3202e, #861622;
+  --papier1: #2e6b3f, #1f4d2c;
+  --papier2: #8a6a24, #6b5018;
+  --papier3: #7d1d3f, #5a132d;
+  --papier-gross: #b3202e, #6e1420;
+  --band: #fff1c9;
+  --band-dunkel: #d6b86e;
+  --zahl: #fffaf0;
+  --rand: rgba(110, 20, 32, 0.15);
+  --schatten: 0 6px 16px rgba(80, 40, 10, 0.22);
+}
+
+// ---------- Rahmen und Kopf ----------
 
 .adventskalender {
   container-type: inline-size;
   position: relative;
   overflow: hidden;
-  padding: 28px 32px 32px;
+  padding: 20px 28px 24px;
   border-radius: 16px;
-  background:
-    radial-gradient(ellipse at 15% 0%, rgba($gold, 0.10), transparent 55%),
-    radial-gradient(ellipse at 90% 100%, rgba(#e05770, 0.10), transparent 50%),
-    linear-gradient(180deg, $nacht-hell, $nacht);
-  color: $creme;
+  border: 1px solid var(--rand);
+  background: var(--hintergrund);
+  color: var(--titel);
 
-  // Leiser Schneefall als Muster im Hintergrund.
+  // Leiser Schneefall als Muster im Hintergrund (nur Winternacht).
   &::before {
     content: '';
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.35;
+    opacity: var(--schnee);
     background-image:
-      radial-gradient(circle, rgba($creme, 0.7) 1px, transparent 1.5px),
-      radial-gradient(circle, rgba($creme, 0.45) 1px, transparent 1.5px);
+      radial-gradient(circle, rgba(247, 239, 231, 0.7) 1px, transparent 1.5px),
+      radial-gradient(circle, rgba(247, 239, 231, 0.45) 1px, transparent 1.5px);
     background-size: 120px 120px, 70px 70px;
     background-position: 0 0, 35px 45px;
   }
@@ -41,51 +104,53 @@ $serif: Georgia, 'Times New Roman', serif;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .titel {
   margin: 0;
   font-family: $serif;
-  font-size: 2.25rem;
+  font-size: 2rem;
   font-weight: 400;
-  letter-spacing: 0.01em;
-  color: $creme;
+  line-height: 1.15;
+  color: var(--titel);
 }
 
 .untertitel {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   font-size: 0.95rem;
   letter-spacing: 0.04em;
-  color: $gold;
+  color: var(--akzent);
 }
 
 .vorschauHinweis {
   padding: 4px 12px;
-  border: 1px solid rgba($gold, 0.5);
+  border: 1px solid var(--akzent);
   border-radius: 999px;
   font-size: 0.8rem;
-  color: $gold;
+  color: var(--akzent);
   white-space: nowrap;
 }
 
 .redaktionsHinweis {
   position: relative;
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   padding: 10px 14px;
-  border: 1px solid rgba($gold, 0.5);
+  border: 1px solid var(--akzent);
   border-radius: 10px;
-  background: rgba($gold, 0.08);
-  color: $creme;
+  color: var(--titel);
   font-size: 0.9rem;
 }
+
+// ---------- Raster ----------
 
 .raster {
   position: relative;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  grid-auto-rows: clamp(84px, 10.5cqi, 170px);
-  gap: 12px;
+  // Reihenhöhe so wählen, dass der ganze Kalender (Kopf + 5 Reihen) in die Bildschirmhöhe passt.
+  grid-auto-rows: clamp(60px, min(10.5cqi, calc((100vh - 220px) / 5)), 170px);
+  gap: 10px;
 }
 
 // Schmale Flächen: einfaches Raster ohne feste Plätze.
@@ -101,7 +166,10 @@ $serif: Georgia, 'Times New Roman', serif;
   }
 }
 
+// ---------- Türchen als Geschenk ----------
+
 .tuerchen {
+  --b: clamp(8px, 1.3cqi, 16px);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -110,149 +178,263 @@ $serif: Georgia, 'Times New Roman', serif;
   gap: 2px;
   min-width: 0;
   padding: 0;
-  border: 1px solid rgba($creme, 0.10);
-  border-radius: 12px;
-  color: $creme;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  color: var(--zahl);
   font: inherit;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  box-shadow: var(--schatten), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  transition: transform 180ms ease, box-shadow 180ms ease;
 
   &:focus-visible {
-    outline: 2px solid $gold;
+    outline: 3px solid var(--akzent);
     outline-offset: 3px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
   }
 }
 
-// Vier Farben für die Türen: Glühwein-Rot, Tannengrün, Nachtblau, Pflaume.
-.farbe0 { background: linear-gradient(155deg, #6a2133, #3d1220); }
-.farbe1 { background: linear-gradient(155deg, #24493f, #14291f); }
-.farbe2 { background: linear-gradient(155deg, #26355c, #161e36); }
-.farbe3 { background: linear-gradient(155deg, #4a2b56, #2a1832); }
+.farbe0 { background: $muster-streifen, linear-gradient(155deg, var(--papier0)); }
+.farbe1 { background: $muster-punkte 0 0 / 14px 14px, linear-gradient(155deg, var(--papier1)); }
+.farbe2 { background: $muster-karo 0 0 / 20px 20px, linear-gradient(155deg, var(--papier2)); }
+.farbe3 { background: $muster-sterne 0 0 / 26px 26px, linear-gradient(155deg, var(--papier3)); }
 
-// Innerer Rahmen, damit jedes Feld wie eine Tür wirkt.
+.start,
+.finale {
+  background: $muster-sterne 0 0 / 30px 30px, radial-gradient(ellipse at 60% 60%, rgba(255, 255, 255, 0.12), transparent 65%),
+    linear-gradient(155deg, var(--papier-gross));
+}
+
+// Innerer Rahmen, sichtbar sobald das Geschenk ausgepackt ist.
 .rahmen {
   position: absolute;
   inset: 7px;
-  border: 1px solid rgba($creme, 0.09);
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.geoeffnet .rahmen {
+  opacity: 1;
+}
+
+// Geschenkband: senkrecht und waagerecht, Kreuzung im linken oberen Drittel, damit die Zahl frei bleibt.
+.geschenk {
+  position: absolute;
+  inset: 0;
   pointer-events: none;
 }
 
+.bandSenkrecht,
+.bandWaagerecht {
+  position: absolute;
+  background: linear-gradient(90deg, var(--band-dunkel), var(--band) 30%, var(--band) 70%, var(--band-dunkel));
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
+  transition: transform 450ms cubic-bezier(0.5, 0, 0.75, 0), opacity 450ms ease;
+}
+
+.bandSenkrecht {
+  top: 0;
+  bottom: 0;
+  left: 22%;
+  width: var(--b);
+  transform-origin: top;
+}
+
+.bandWaagerecht {
+  left: 0;
+  right: 0;
+  top: 26%;
+  height: var(--b);
+  background: linear-gradient(180deg, var(--band-dunkel), var(--band) 30%, var(--band) 70%, var(--band-dunkel));
+  transform-origin: left;
+}
+
+.schleife {
+  position: absolute;
+  left: 22%;
+  top: 26%;
+  width: clamp(40px, 6cqi, 84px);
+  height: auto;
+  margin-left: calc(var(--b) / 2);
+  margin-top: calc(var(--b) / 2);
+  fill: var(--band);
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+  transform: translate(-50%, -55%);
+  transform-origin: 50% 55%;
+  transition: transform 500ms ease, opacity 500ms ease;
+}
+
+.schleifeEnde {
+  fill: var(--band-dunkel);
+}
+
+.schleifeSchatten {
+  fill: rgba(0, 0, 0, 0.18);
+}
+
+.start .schleife,
+.finale .schleife {
+  width: clamp(64px, 9.5cqi, 130px);
+}
+
+// Hover: die Schleife wackelt.
+@keyframes wackeln {
+  0%, 100% { transform: translate(-50%, -55%) rotate(0deg); }
+  20% { transform: translate(-50%, -55%) rotate(-12deg); }
+  40% { transform: translate(-50%, -55%) rotate(10deg); }
+  60% { transform: translate(-50%, -55%) rotate(-6deg); }
+  80% { transform: translate(-50%, -55%) rotate(3deg); }
+}
+
+.offen:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--schatten), 0 10px 26px rgba(0, 0, 0, 0.25);
+
+  .schleife {
+    animation: wackeln 700ms ease-in-out infinite;
+  }
+}
+
+// Öffnen: das Band löst sich, die Schleife fliegt weg.
+.loest {
+  .schleife {
+    animation: none;
+    transform: translate(-50%, -140%) rotate(35deg) scale(1.3);
+    opacity: 0;
+  }
+
+  .bandSenkrecht {
+    transform: translateY(105%);
+    opacity: 0;
+  }
+
+  .bandWaagerecht {
+    transform: translateX(105%);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tuerchen,
+  .schleife,
+  .bandSenkrecht,
+  .bandWaagerecht {
+    transition: none;
+  }
+
+  .offen:hover {
+    transform: none;
+
+    .schleife {
+      animation: none;
+    }
+  }
+}
+
+// ---------- Zahl und Beschriftung ----------
+
 .zahl {
   position: relative;
+  margin: 8% 0 0 12%;
   font-family: $serif;
-  font-size: clamp(1.6rem, 3.4cqi, 2.8rem);
+  font-size: clamp(1.5rem, 3.2cqi, 2.6rem);
   line-height: 1;
-  color: $gold;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-}
-
-.beschriftung {
-  position: relative;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: $gedaempft;
-}
-
-.countdown {
-  position: absolute;
-  bottom: 12px;
-  font-size: 0.72rem;
-  color: $gedaempft;
-}
-
-// Große Türchen: 1 (Start) und 24 (Finale).
-.start,
-.finale {
-  border-color: rgba($gold, 0.55);
-  background:
-    radial-gradient(ellipse at 50% 40%, rgba($gold, 0.18), transparent 65%),
-    linear-gradient(155deg, #7a2236, #3d1220);
-
-  .rahmen {
-    inset: 10px;
-    border-color: rgba($gold, 0.35);
-  }
-
-  .beschriftung {
-    font-size: 0.9rem;
-    color: $gold-hell;
-  }
+  color: var(--zahl);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .start .zahl {
-  font-size: clamp(3rem, 7.5cqi, 6rem);
+  font-size: clamp(2.8rem, 7cqi, 5.5rem);
 }
 
 .finale .zahl {
-  font-size: clamp(3.5rem, 9cqi, 7.5rem);
-  color: $gold-hell;
+  font-size: clamp(3.2rem, 8.5cqi, 7rem);
 }
 
 .klein {
-  // Standardgröße, keine Besonderheiten.
+  // Standardgröße ohne Besonderheiten.
   min-height: 0;
 }
 
 .hoch .zahl,
 .breit .zahl {
-  font-size: clamp(1.9rem, 4.2cqi, 3.4rem);
+  font-size: clamp(1.8rem, 4cqi, 3.2rem);
 }
 
-.offen:hover {
-  transform: translateY(-3px);
-  border-color: rgba($gold, 0.8);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba($gold, 0.35);
-
-  @media (prefers-reduced-motion: reduce) {
-    transform: none;
-  }
+.geoeffnet .zahl {
+  margin: 0;
 }
+
+.beschriftung {
+  position: relative;
+  margin-left: 12%;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--zahl);
+  opacity: 0.85;
+}
+
+.geoeffnet .beschriftung {
+  margin-left: 0;
+}
+
+.countdown {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.28);
+  font-size: 0.7rem;
+  color: #fff;
+}
+
+// ---------- Zustände ----------
 
 .gesperrt {
   cursor: default;
-  filter: saturate(0.55) brightness(0.75);
-
-  .zahl {
-    color: rgba($creme, 0.55);
-    text-shadow: none;
-  }
+  filter: saturate(0.7) brightness(0.88);
 }
 
-// Heute zu öffnen: goldener Schein und kleine Marke.
 .heute {
-  border-color: $gold;
-  box-shadow: 0 0 0 2px rgba($gold, 0.9), 0 0 32px rgba($gold, 0.35);
+  box-shadow: 0 0 0 3px var(--akzent), 0 0 28px var(--akzent);
 }
 
 .heuteMarke {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  right: 10px;
+  top: 10px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: $gold;
-  color: #2a1708;
-  font-size: 0.7rem;
+  background: var(--akzent);
+  color: #fff;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-// Schon geöffnet: Tür steht einen Spalt offen, Licht fällt heraus.
+// Ausgepackt: Papier ohne Band, leicht abgedunkelt, mit Lichtspalt.
 .geoeffnet {
-  box-shadow: inset -4px 0 0 rgba($gold, 0.5), inset -16px 0 20px -14px rgba($gold, 0.5), 0 6px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--schatten), inset -4px 0 0 rgba(255, 255, 255, 0.35), inset -16px 0 20px -14px rgba(255, 255, 255, 0.4);
 
-  .zahl {
-    color: rgba($gold, 0.7);
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.18);
+    pointer-events: none;
+  }
+
+  .zahl,
+  .beschriftung {
+    z-index: 1;
   }
 }
+
+// ---------- Dialog-Inhalt ----------
 
 .bild {
   display: block;
@@ -269,11 +451,5 @@ $serif: Georgia, 'Times New Roman', serif;
 }
 
 .link {
-  color: $gold;
   font-weight: 600;
-
-  &:hover,
-  &:active {
-    color: $gold-hell;
-  }
 }

@@ -2,6 +2,7 @@ declare interface IAdventskalenderWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
   TitelFieldLabel: string;
+  DesignFieldLabel: string;
   JahrFieldLabel: string;
   JahrFieldDescription: string;
   JahrFieldError: string;

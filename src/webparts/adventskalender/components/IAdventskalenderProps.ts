@@ -1,9 +1,11 @@
 import { ITuerchenInhalt } from '../logic/ITuerchenInhalt';
+import { Design } from '../logic/designs';
 
 export interface IAdventskalenderProps {
   titel: string;
   jahr: number;
   gemischt: boolean;
+  design: Design;
   /** Redaktionsvorschau: alle Türchen offen, unabhängig vom Datum. */
   vorschau: boolean;
   /** Lädt die Inhalte der freigeschalteten Türchen (aus der SharePoint-Liste). */

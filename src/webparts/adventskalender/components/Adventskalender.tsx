@@ -5,34 +5,45 @@ import type { IAdventskalenderProps } from './IAdventskalenderProps';
 import type { ITuerchenInhalt } from '../logic/ITuerchenInhalt';
 import { adventsHinweis, istOffen, tageBisOffen } from '../logic/freischaltung';
 import { belegePlaetze, IBelegterPlatz } from '../logic/layout';
+import { Design, DIALOG_FARBEN, IDialogFarben } from '../logic/designs';
 import Tuerchen from './Tuerchen';
 
-// Dialog im Stil des Kalenders statt im weißen Standard-Look.
-const DIALOG_STIL: Partial<IDialogStyles> = {
-  main: {
-    background: 'linear-gradient(180deg, #241a30, #150f1a)',
-    color: '#f7efe7',
-    border: '1px solid rgba(243, 182, 106, 0.45)',
-    borderRadius: 16,
-    boxShadow: '0 24px 64px rgba(0, 0, 0, 0.55)'
-  }
-};
-
-const DIALOG_INHALT_STIL: Partial<IDialogContentStyles> = {
-  title: {
-    color: '#f3b66a',
-    fontFamily: "Georgia, 'Times New Roman', serif",
-    fontSize: 30,
-    fontWeight: 400,
-    paddingBottom: 12
-  },
-  inner: { color: '#f7efe7' },
-  topButton: {
-    selectors: {
-      '.ms-Button': { color: '#f7efe7' },
-      '.ms-Button:hover': { color: '#f3b66a', background: 'rgba(255, 255, 255, 0.08)' }
+// Dialog im Stil des gewählten Designs statt im Standard-Look.
+function dialogStil(farben: IDialogFarben): Partial<IDialogStyles> {
+  return {
+    main: {
+      background: farben.hintergrund,
+      color: farben.text,
+      border: `1px solid ${farben.rand}`,
+      borderRadius: 16,
+      boxShadow: '0 24px 64px rgba(0, 0, 0, 0.45)'
     }
-  }
+  };
+}
+
+function dialogInhaltStil(farben: IDialogFarben): Partial<IDialogContentStyles> {
+  return {
+    title: {
+      color: farben.titel,
+      fontFamily: "Georgia, 'Times New Roman', serif",
+      fontSize: 30,
+      fontWeight: 400,
+      paddingBottom: 12
+    },
+    inner: { color: farben.text },
+    topButton: {
+      selectors: {
+        '.ms-Button': { color: farben.text },
+        '.ms-Button:hover': { color: farben.titel, background: 'rgba(127, 127, 127, 0.12)' }
+      }
+    }
+  };
+}
+
+const DESIGN_KLASSEN: { [design in Design]: string } = {
+  winternacht: styles.winternacht,
+  ihk: styles.ihk,
+  klassisch: styles.klassisch
 };
 
 function ladeGeoeffnete(schluessel: string): number[] {
@@ -53,7 +64,8 @@ function speichereGeoeffnete(schluessel: string, tage: number[]): void {
 }
 
 export default function Adventskalender(props: IAdventskalenderProps): React.ReactElement<IAdventskalenderProps> {
-  const { titel, jahr, gemischt, vorschau, speicherSchluessel, ladeInhalte, ladeSchluessel, bearbeitungsModus } = props;
+  const { titel, jahr, gemischt, vorschau, speicherSchluessel, ladeInhalte, ladeSchluessel, bearbeitungsModus, design } = props;
+  const farben: IDialogFarben = DIALOG_FARBEN[design];
   const jetzt: Date = props.jetzt ?? new Date();
   const [offenerTag, setOffenerTag] = React.useState<number | undefined>(undefined);
   const [geoeffnete, setGeoeffnete] = React.useState<number[]>(() => ladeGeoeffnete(speicherSchluessel));
@@ -99,7 +111,7 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
     offenerTag === undefined ? undefined : inhalte.filter(i => i.tag === offenerTag)[0];
 
   return (
-    <section className={styles.adventskalender}>
+    <section className={`${styles.adventskalender} ${DESIGN_KLASSEN[design]}`}>
       <header className={styles.kopf}>
         <div>
           {titel && <h2 className={styles.titel}>{titel}</h2>}
@@ -132,16 +144,16 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
           type: DialogType.close,
           title: inhalt?.titel ?? `${offenerTag}. Dezember`,
           closeButtonAriaLabel: 'Schließen',
-          styles: DIALOG_INHALT_STIL
+          styles: dialogInhaltStil(farben)
         }}
-        styles={DIALOG_STIL}
+        styles={dialogStil(farben)}
         minWidth={420}
         maxWidth={640}
       >
         {inhalt?.bildUrl && <img className={styles.bild} src={inhalt.bildUrl} alt="" />}
         <p className={styles.text}>{inhalt?.text || 'Für diesen Tag gibt es noch keinen Inhalt.'}</p>
         {inhalt?.linkUrl && (
-          <Link className={styles.link} href={inhalt.linkUrl} target="_blank" rel="noreferrer">
+          <Link className={styles.link} style={{ color: farben.titel }} href={inhalt.linkUrl} target="_blank" rel="noreferrer">
             Mehr dazu
           </Link>
         )}

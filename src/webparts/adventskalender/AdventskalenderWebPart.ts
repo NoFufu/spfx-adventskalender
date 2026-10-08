@@ -5,6 +5,7 @@ import {
   type IPropertyPaneConfiguration,
   PropertyPaneButton,
   PropertyPaneButtonType,
+  PropertyPaneDropdown,
   PropertyPaneLabel,
   PropertyPaneTextField,
   PropertyPaneToggle
@@ -16,6 +17,7 @@ import Adventskalender from './components/Adventskalender';
 import { IAdventskalenderProps } from './components/IAdventskalenderProps';
 import { AdventskalenderListe } from './logic/AdventskalenderListe';
 import { hoechsterOffenerTag } from './logic/freischaltung';
+import { DESIGNS, gueltigesDesign } from './logic/designs';
 
 export interface IAdventskalenderWebPartProps {
   titel: string;
@@ -24,6 +26,7 @@ export interface IAdventskalenderWebPartProps {
   gemischt: boolean;
   vorschau: boolean;
   listenName: string;
+  design: string;
 }
 
 const STANDARD_LISTE: string = 'Adventskalender';
@@ -48,6 +51,7 @@ export default class AdventskalenderWebPart extends BaseClientSideWebPart<IAdven
         titel: this.properties.titel,
         jahr,
         gemischt: !!this.properties.gemischt,
+        design: gueltigesDesign(this.properties.design),
         vorschau,
         ladeInhalte: () => liste.laden(jahr, bisTag),
         ladeSchluessel: `${this._listenName()}|${jahr}|${bisTag}|${this._ladeZaehler}`,
@@ -118,6 +122,11 @@ export default class AdventskalenderWebPart extends BaseClientSideWebPart<IAdven
               groupFields: [
                 PropertyPaneTextField('titel', {
                   label: strings.TitelFieldLabel
+                }),
+                PropertyPaneDropdown('design', {
+                  label: strings.DesignFieldLabel,
+                  options: DESIGNS,
+                  selectedKey: gueltigesDesign(this.properties.design)
                 }),
                 PropertyPaneTextField('jahr', {
                   label: strings.JahrFieldLabel,

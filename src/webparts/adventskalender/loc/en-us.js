@@ -2,6 +2,7 @@ define([], function() {
   return {
     "PropertyPaneDescription": "Advent calendar settings",
     "BasicGroupName": "General",
+    "DesignFieldLabel": "Design",
     "TitelFieldLabel": "Heading",
     "JahrFieldLabel": "Year",
     "JahrFieldDescription": "Leave empty for the current year",
