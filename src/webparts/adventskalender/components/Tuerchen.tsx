@@ -1,10 +1,19 @@
 import * as React from 'react';
 import styles from './Adventskalender.module.scss';
-import { Groesse, IBelegterPlatz, spannweite } from '../logic/layout';
 import { IVerpackung, verpackung } from '../logic/verpackung';
 
+/** halb = Wochenend-Türchen in einer geteilten Zelle. */
+export type TuerGroesse = 'start' | 'finale' | 'breit' | 'hoch' | 'klein' | 'halb';
+
 export interface ITuerchenProps {
-  platz: IBelegterPlatz;
+  tag: number;
+  groesse: TuerGroesse;
+  /** Papierfarbe 0-3. */
+  farbe: number;
+  /** Lage im Raster; fehlt bei halben Türchen, die in ihrer Zelle liegen. */
+  lage?: React.CSSProperties;
+  /** Titel des Inhalts, wird auf dem geöffneten Türchen gezeigt. */
+  inhaltTitel?: string;
   offen: boolean;
   heute: boolean;
   geoeffnet: boolean;
@@ -18,13 +27,27 @@ const FARBEN: string[] = [styles.farbe0, styles.farbe1, styles.farbe2, styles.fa
 const MUSTER: string[] = [styles.muster0, styles.muster1, styles.muster2, styles.muster3, styles.muster4];
 const BANDFARBEN: string[] = [styles.band0, styles.band1, styles.band2];
 
-const GROESSEN: { [groesse in Groesse]: string } = {
+const GROESSEN: { [groesse in TuerGroesse]: string } = {
   start: styles.start,
   finale: styles.finale,
   breit: styles.breit,
   hoch: styles.hoch,
-  klein: styles.klein
+  klein: styles.klein,
+  halb: styles.halb
 };
+
+const WOCHENTAGE: string[] = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+/** Funkelnde Sterne auf dem Hauptgeschenk: Lage in Prozent, Größe in Pixel, Verzögerung in Sekunden. */
+const FUNKELN: { x: number; y: number; groesse: number; verzoegerung: number }[] = [
+  { x: 12, y: 18, groesse: 16, verzoegerung: 0 },
+  { x: 88, y: 14, groesse: 12, verzoegerung: 0.7 },
+  { x: 70, y: 78, groesse: 18, verzoegerung: 1.3 },
+  { x: 8, y: 82, groesse: 11, verzoegerung: 1.9 },
+  { x: 46, y: 10, groesse: 10, verzoegerung: 0.4 },
+  { x: 92, y: 60, groesse: 14, verzoegerung: 2.2 },
+  { x: 30, y: 62, groesse: 9, verzoegerung: 1.0 }
+];
 
 // Feste Feiertage im Advent, die eine kleine Beschriftung bekommen.
 const BESCHRIFTUNG: { [tag: number]: string } = {
@@ -74,20 +97,28 @@ function Rosette(): React.ReactElement {
 }
 
 export default function Tuerchen(props: ITuerchenProps): React.ReactElement<ITuerchenProps> {
-  const { platz, offen, heute, geoeffnet, tageBisOffen, jahr, onOeffnen } = props;
-  const { tag, groesse } = platz;
+  const { tag, groesse, farbe, inhaltTitel, offen, heute, geoeffnet, tageBisOffen, jahr, onOeffnen } = props;
   const gross: boolean = groesse === 'start' || groesse === 'finale';
-  const v: IVerpackung = React.useMemo(() => verpackung(tag, jahr, gross), [tag, jahr, gross]);
-  const { spalten, zeilen } = spannweite(groesse);
+  const halb: boolean = groesse === 'halb';
+  const v: IVerpackung = React.useMemo(() => {
+    const basis: IVerpackung = verpackung(tag, jahr, gross);
+    // Halbe Türchen sind flach: nur ein senkrechtes Band mit kleiner Schleife, Zahl daneben.
+    return halb ? { ...basis, art: 'senkrecht', schleife: 'klassisch', bandY: 50, zahlY: 50 } : basis;
+  }, [tag, jahr, gross, halb]);
   const [loest, setLoest] = React.useState<boolean>(false);
-  const nochTage: string = `noch ${tageBisOffen} ${tageBisOffen === 1 ? 'Tag' : 'Tage'}`;
-  const hinweis: string = offen ? `Türchen ${tag} öffnen` : `Türchen ${tag}, ${nochTage}`;
+  const nochTage: string = halb
+    ? `${tageBisOffen} T.`
+    : `noch ${tageBisOffen} ${tageBisOffen === 1 ? 'Tag' : 'Tage'}`;
+  const wochentag: string = WOCHENTAGE[new Date(jahr, 11, tag).getDay()];
+  const hinweis: string = offen
+    ? `Türchen ${tag} öffnen`
+    : `Türchen ${tag}, noch ${tageBisOffen} ${tageBisOffen === 1 ? 'Tag' : 'Tage'}`;
   const verpackt: boolean = !geoeffnet;
 
   const klassen: string[] = [
     styles.tuerchen,
     GROESSEN[groesse],
-    FARBEN[platz.farbe],
+    FARBEN[farbe],
     MUSTER[v.muster],
     BANDFARBEN[v.bandFarbe],
     offen ? styles.offen : styles.gesperrt
@@ -107,8 +138,7 @@ export default function Tuerchen(props: ITuerchenProps): React.ReactElement<ITue
 
   // Position im Raster und Verpackung als CSS-Variablen; das Stylesheet setzt daraus Band, Schleife und Zahl.
   const lage: React.CSSProperties = {
-    gridColumn: `${platz.spalte} / span ${spalten}`,
-    gridRow: `${platz.zeile} / span ${zeilen}`,
+    ...props.lage,
     ['--band-x' as string]: `${v.bandX}%`,
     ['--band-y' as string]: `${v.bandY}%`,
     ['--zahl-x' as string]: `${v.zahlX}%`,
@@ -153,13 +183,26 @@ export default function Tuerchen(props: ITuerchenProps): React.ReactElement<ITue
         <span className={styles.geschenk} aria-hidden="true">
           {v.art !== 'waagerecht' && <span className={styles.bandSenkrecht} />}
           {v.art !== 'senkrecht' && <span className={styles.bandWaagerecht} />}
+          {v.art === 'anhaenger' && <span className={styles.faden} />}
           {v.schleife === 'rosette' ? <Rosette /> : <KlassischeSchleife />}
         </span>
       )}
+      {groesse === 'finale' && verpackt && FUNKELN.map((f, i) => (
+        <span
+          key={i}
+          className={styles.funkeln}
+          style={{ left: `${f.x}%`, top: `${f.y}%`, width: f.groesse, height: f.groesse, animationDelay: `${f.verzoegerung}s` }}
+          aria-hidden="true"
+        />
+      ))}
       {heute && !geoeffnet && <span className={styles.heuteMarke} style={markeEcke}>Heute</span>}
       <span className={styles.etikett}>
         <span className={styles.zahl}>{tag}</span>
-        {BESCHRIFTUNG[tag] && <span className={styles.beschriftung}>{BESCHRIFTUNG[tag]}</span>}
+        {halb && <span className={styles.wochentag}>{wochentag}</span>}
+        {!halb && BESCHRIFTUNG[tag] && <span className={styles.beschriftung}>{BESCHRIFTUNG[tag]}</span>}
+        {geoeffnet && !halb && (
+          <span className={styles.inhaltTitel}>{inhaltTitel || 'Nochmal ansehen'}</span>
+        )}
       </span>
       {!offen && <span className={styles.countdown} style={countdownEcke}>{nochTage}</span>}
     </button>

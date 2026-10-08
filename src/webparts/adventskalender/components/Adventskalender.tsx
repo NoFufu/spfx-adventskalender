@@ -4,9 +4,10 @@ import styles from './Adventskalender.module.scss';
 import type { IAdventskalenderProps } from './IAdventskalenderProps';
 import type { ITuerchenInhalt } from '../logic/ITuerchenInhalt';
 import { adventsHinweis, istOffen, tageBisOffen } from '../logic/freischaltung';
-import { belegePlaetze, IBelegterPlatz } from '../logic/layout';
+import { belegePlaetze, IBelegung, IZelle, spannweite } from '../logic/layout';
 import { Design, DESIGN_KNOEPFE, DIALOG_FARBEN, gueltigesDesign, IDialogFarben } from '../logic/designs';
-import Tuerchen from './Tuerchen';
+import Tuerchen, { TuerGroesse } from './Tuerchen';
+import Deko from './Deko';
 
 // Dialog im Stil des gewählten Designs statt im Standard-Look.
 function dialogStil(farben: IDialogFarben): Partial<IDialogStyles> {
@@ -124,7 +125,7 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
     };
   }, [ladeSchluessel]);
 
-  const plaetze: IBelegterPlatz[] = React.useMemo(() => belegePlaetze(jahr, gemischt), [jahr, gemischt]);
+  const zellen: IZelle[] = React.useMemo(() => belegePlaetze(jahr, gemischt), [jahr, gemischt]);
   const heutigerTag: number =
     jetzt.getFullYear() === jahr && jetzt.getMonth() === 11 ? jetzt.getDate() : 0;
 
@@ -136,6 +137,23 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
       speichereGeoeffnete(speicherSchluessel, neu);
     }
   };
+
+  const zeigeTuer = (b: IBelegung, groesse: TuerGroesse, lage?: React.CSSProperties): React.ReactElement => (
+    <Tuerchen
+      key={b.tag}
+      tag={b.tag}
+      groesse={groesse}
+      farbe={b.farbe}
+      lage={lage}
+      inhaltTitel={inhalte.filter(i => i.tag === b.tag)[0]?.titel}
+      offen={vorschau || istOffen(b.tag, jahr, jetzt)}
+      heute={b.tag === heutigerTag}
+      geoeffnet={geoeffnete.indexOf(b.tag) !== -1}
+      tageBisOffen={tageBisOffen(b.tag, jahr, jetzt)}
+      jahr={jahr}
+      onOeffnen={oeffne}
+    />
+  );
 
   const inhalt: ITuerchenInhalt | undefined =
     offenerTag === undefined ? undefined : inhalte.filter(i => i.tag === offenerTag)[0];
@@ -171,18 +189,23 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
         </p>
       )}
       <div className={styles.raster}>
-        {plaetze.map(platz => (
-          <Tuerchen
-            key={platz.tag}
-            platz={platz}
-            offen={vorschau || istOffen(platz.tag, jahr, jetzt)}
-            heute={platz.tag === heutigerTag}
-            geoeffnet={geoeffnete.indexOf(platz.tag) !== -1}
-            tageBisOffen={tageBisOffen(platz.tag, jahr, jetzt)}
-            jahr={jahr}
-            onOeffnen={oeffne}
-          />
-        ))}
+        {zellen.map(zelle => {
+          const { spalten, zeilen } = spannweite(zelle.groesse);
+          const lage: React.CSSProperties = {
+            gridColumn: `${zelle.spalte} / span ${spalten}`,
+            gridRow: `${zelle.zeile} / span ${zeilen}`
+          };
+          const schluessel: string = `${zelle.zeile}-${zelle.spalte}`;
+          if (zelle.groesse === 'doppelt' && zelle.belegung.some(b => b)) {
+            return (
+              <div key={schluessel} className={styles.doppelt} style={lage}>
+                {zelle.belegung.map((b, i) => (b ? zeigeTuer(b, 'halb') : <Deko key={`deko-${i}`} halb />))}
+              </div>
+            );
+          }
+          const b: IBelegung | undefined = zelle.groesse === 'doppelt' ? undefined : zelle.belegung[0];
+          return b ? zeigeTuer(b, zelle.groesse as TuerGroesse, lage) : <Deko key={schluessel} lage={lage} />;
+        })}
       </div>
       <Dialog
         hidden={offenerTag === undefined}

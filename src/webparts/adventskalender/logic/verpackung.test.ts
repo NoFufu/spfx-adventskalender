@@ -24,7 +24,9 @@ describe('verpackung', () => {
       if (v.art !== 'waagerecht') {
         expect(v.bandX < 50).toBe(v.zahlX > 50);
       }
-      if (v.art !== 'senkrecht') {
+      if (v.art === 'anhaenger') {
+        expect(v.bandY).toBeLessThan(30);
+      } else if (v.art !== 'senkrecht') {
         expect(v.bandY < 50).toBe(v.zahlY > 50);
       }
     }

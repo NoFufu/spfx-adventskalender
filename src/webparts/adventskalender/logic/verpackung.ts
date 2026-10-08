@@ -1,7 +1,7 @@
 // Jedes Türchen bekommt eine eigene Verpackung: Bandlage, Schleifenform, Drehung, Bandfarbe und Papiermuster.
 // Alles hängt nur von Tag und Jahr ab, damit ein Türchen bei jedem Seitenaufruf gleich aussieht.
 
-/** kreuz = Band in beide Richtungen, senkrecht/waagerecht = nur ein Band, anhaenger = Kreuz mit Namensschild für die Zahl. */
+/** kreuz = Band in beide Richtungen, senkrecht/waagerecht = nur ein Band, anhaenger = Kreuz mit Kärtchen für die Zahl, das am Band hängt. */
 export type Verpackungsart = 'kreuz' | 'senkrecht' | 'waagerecht' | 'anhaenger';
 
 /** klassisch = Schleife mit zwei Schlaufen, rosette = runde Rosettenschleife. */
@@ -64,7 +64,8 @@ export function verpackung(tag: number, jahr: number, gross: boolean): IVerpacku
   const zufall: () => number = zufallsfolge(jahr * 1000 + tag * 7919);
   const art: Verpackungsart = gross ? 'kreuz' : ARTEN[Math.floor(zufall() * ARTEN.length)];
   const bandX: number = seitenlage(zufall);
-  const bandY: number = seitenlage(zufall);
+  // Der Anhänger hängt unter der Schleife am Band, dafür braucht er Platz nach unten.
+  const bandY: number = art === 'anhaenger' ? zwischen(zufall, 18, 28) : seitenlage(zufall);
   return {
     art,
     schleife: zufall() < 0.6 ? 'klassisch' : 'rosette',
