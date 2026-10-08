@@ -12,7 +12,7 @@ define([], function() {
     "ListenNameFieldLabel": "Liste mit den Inhalten",
     "ListenNameFieldDescription": "Name einer Liste auf dieser Website. Leer lassen für \"Adventskalender\".",
     "ListeAnlegenButton": "Liste anlegen",
-    "ListeAnlegenHinweis": "Legt die Liste mit allen Spalten an und füllt sie mit 24 leeren Zeilen für das eingestellte Jahr. Vorhandene Zeilen bleiben erhalten.",
+    "ListeAnlegenHinweis": "Legt die Liste mit allen Spalten an und füllt sie mit 24 Beispielinhalten für das eingestellte Jahr. Vorhandene Zeilen bleiben erhalten.",
     "ListeWirdAngelegt": "Liste wird angelegt …",
     "ListeAngelegt": "Fertig: {0} Zeilen angelegt. Die Inhalte pflegst du direkt in der Liste.",
     "ListeVollstaendig": "Die Liste ist schon vollständig, es fehlt keine Zeile."

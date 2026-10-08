@@ -1,4 +1,5 @@
 import { sichereUrl, zeileZuInhalt } from './listenZeile';
+import { BEISPIELE } from './beispielDaten';
 
 describe('sichereUrl', () => {
   it('übernimmt nur http- und https-Adressen', () => {
@@ -18,5 +19,12 @@ describe('zeileZuInhalt', () => {
   it('ignoriert Zeilen ohne gültigen Tag', () => {
     expect(zeileZuInhalt({ Title: 'x', Tag: 25 })).toBeUndefined();
     expect(zeileZuInhalt({ Title: 'x' })).toBeUndefined();
+  });
+});
+
+describe('Beispielinhalte', () => {
+  it('gibt es für alle 24 Tage mit Titel und Text', () => {
+    expect(BEISPIELE).toHaveLength(24);
+    expect(BEISPIELE.every(b => b.titel !== '' && b.text !== '')).toBe(true);
   });
 });

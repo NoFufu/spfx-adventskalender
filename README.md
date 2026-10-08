@@ -15,7 +15,7 @@ npm run start   # lokale Entwicklung gegen die gehostete Workbench (config/serve
 Die Türchen lesen ihre Inhalte aus einer SharePoint-Liste auf derselben Website (Standardname "Adventskalender").
 
 1. Seite bearbeiten, Webpart-Einstellungen öffnen, unter "Inhalte" auf **Liste anlegen** klicken.
-   Das legt die Liste mit allen Spalten an und erzeugt 24 leere Zeilen für das eingestellte Jahr.
+   Das legt die Liste mit allen Spalten an und erzeugt 24 Zeilen mit Beispielinhalten für das eingestellte Jahr.
 2. In der Liste pro Zeile ausfüllen: **Titel**, **Text**, optional **Bild** (Adresse eines Bildes, z. B. aus der Websiteobjekte-Bibliothek) und **Link**.
 3. Speichern. Änderungen erscheinen beim nächsten Laden der Seite, ohne neues Paket.
 

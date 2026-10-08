@@ -2,6 +2,7 @@ import { SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
 import { ITuerchenInhalt } from './ITuerchenInhalt';
 import { ANZAHL_TUERCHEN } from './freischaltung';
 import { IListenZeile, zeileZuInhalt } from './listenZeile';
+import { BEISPIELE } from './beispielDaten';
 
 // Zugriff auf die SharePoint-Liste mit den Türchen-Inhalten (eine Zeile pro Tag und Jahr).
 //
@@ -56,7 +57,7 @@ export class AdventskalenderListe {
 
   /**
    * Legt die Liste mit allen Spalten an (falls sie fehlt) und füllt fehlende Tage des Jahres
-   * mit leeren Zeilen. Bestehende Zeilen bleiben unverändert. Liefert die Zahl neuer Zeilen.
+   * mit Beispielinhalten, die Redakteure danach überschreiben. Bestehende Zeilen bleiben unverändert. Liefert die Zahl neuer Zeilen.
    */
   public async anlegen(jahr: number): Promise<number> {
     const vorhanden: SPHttpClientResponse = await this._client.get(
@@ -97,7 +98,8 @@ export class AdventskalenderListe {
     let neu: number = 0;
     for (let tag: number = 1; tag <= ANZAHL_TUERCHEN; tag++) {
       if (tage.indexOf(tag) === -1) {
-        await this._sende(`${this._listenPfad}/items`, { Title: `${tag}. Dezember`, Tag: tag, Jahr: jahr });
+        const beispiel = BEISPIELE[tag - 1];
+        await this._sende(`${this._listenPfad}/items`, { Title: beispiel.titel, Text: beispiel.text, Tag: tag, Jahr: jahr });
         neu++;
       }
     }
