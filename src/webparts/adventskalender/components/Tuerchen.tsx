@@ -1,6 +1,7 @@
 import * as React from 'react';
 import styles from './Adventskalender.module.scss';
 import { Groesse, IBelegterPlatz, spannweite } from '../logic/layout';
+import { IVerpackung, verpackung } from '../logic/verpackung';
 
 export interface ITuerchenProps {
   platz: IBelegterPlatz;
@@ -8,10 +9,14 @@ export interface ITuerchenProps {
   heute: boolean;
   geoeffnet: boolean;
   tageBisOffen: number;
+  /** Jahr des Kalenders, bestimmt zusammen mit dem Tag die Verpackung. */
+  jahr: number;
   onOeffnen: (tag: number) => void;
 }
 
 const FARBEN: string[] = [styles.farbe0, styles.farbe1, styles.farbe2, styles.farbe3];
+const MUSTER: string[] = [styles.muster0, styles.muster1, styles.muster2, styles.muster3, styles.muster4];
+const BANDFARBEN: string[] = [styles.band0, styles.band1, styles.band2];
 
 const GROESSEN: { [groesse in Groesse]: string } = {
   start: styles.start,
@@ -35,7 +40,7 @@ function wenigerBewegung(): boolean {
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-function Schleife(): React.ReactElement {
+function KlassischeSchleife(): React.ReactElement {
   return (
     <svg className={styles.schleife} viewBox="0 0 64 44" aria-hidden="true" focusable="false">
       <path className={styles.schleifeEnde} d="M29 24 L18 43 L24 41 L27 44 L32 26 Z" />
@@ -49,9 +54,30 @@ function Schleife(): React.ReactElement {
   );
 }
 
+// Rosette aus zwei Ringen von Schlaufen, wie bei gekauften Geschenkschleifen.
+const ROSETTE_AUSSEN: number[] = [0, 45, 90, 135, 180, 225, 270, 315];
+const ROSETTE_INNEN: number[] = [22, 82, 142, 202, 262, 322];
+
+function Rosette(): React.ReactElement {
+  return (
+    <svg className={`${styles.schleife} ${styles.rosette}`} viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+      {ROSETTE_AUSSEN.map(winkel => (
+        <ellipse key={winkel} className={styles.schleifeEnde} cx="32" cy="17" rx="7.5" ry="14" transform={`rotate(${winkel} 32 32)`} />
+      ))}
+      {ROSETTE_INNEN.map(winkel => (
+        <ellipse key={winkel} cx="32" cy="21" rx="6" ry="10.5" transform={`rotate(${winkel} 32 32)`} />
+      ))}
+      <circle className={styles.schleifeSchatten} cx="33" cy="33" r="7" />
+      <circle cx="32" cy="32" r="6.5" />
+    </svg>
+  );
+}
+
 export default function Tuerchen(props: ITuerchenProps): React.ReactElement<ITuerchenProps> {
-  const { platz, offen, heute, geoeffnet, tageBisOffen, onOeffnen } = props;
+  const { platz, offen, heute, geoeffnet, tageBisOffen, jahr, onOeffnen } = props;
   const { tag, groesse } = platz;
+  const gross: boolean = groesse === 'start' || groesse === 'finale';
+  const v: IVerpackung = React.useMemo(() => verpackung(tag, jahr, gross), [tag, jahr, gross]);
   const { spalten, zeilen } = spannweite(groesse);
   const [loest, setLoest] = React.useState<boolean>(false);
   const nochTage: string = `noch ${tageBisOffen} ${tageBisOffen === 1 ? 'Tag' : 'Tage'}`;
@@ -62,8 +88,13 @@ export default function Tuerchen(props: ITuerchenProps): React.ReactElement<ITue
     styles.tuerchen,
     GROESSEN[groesse],
     FARBEN[platz.farbe],
+    MUSTER[v.muster],
+    BANDFARBEN[v.bandFarbe],
     offen ? styles.offen : styles.gesperrt
   ];
+  if (v.art === 'anhaenger' && !geoeffnet) {
+    klassen.push(styles.mitAnhaenger);
+  }
   if (heute) {
     klassen.push(styles.heute);
   }
@@ -74,10 +105,22 @@ export default function Tuerchen(props: ITuerchenProps): React.ReactElement<ITue
     klassen.push(styles.loest);
   }
 
+  // Position im Raster und Verpackung als CSS-Variablen; das Stylesheet setzt daraus Band, Schleife und Zahl.
   const lage: React.CSSProperties = {
     gridColumn: `${platz.spalte} / span ${spalten}`,
-    gridRow: `${platz.zeile} / span ${zeilen}`
+    gridRow: `${platz.zeile} / span ${zeilen}`,
+    ['--band-x' as string]: `${v.bandX}%`,
+    ['--band-y' as string]: `${v.bandY}%`,
+    ['--zahl-x' as string]: `${v.zahlX}%`,
+    ['--zahl-y' as string]: `${v.zahlY}%`,
+    ['--dreh' as string]: `${v.dreh}deg`
   };
+  // Kleine Hinweise in die Ecken legen, in denen weder Schleife noch Zahl liegen.
+  const schleifeLinks: boolean = v.bandX < 50;
+  const schleifeOben: boolean = v.bandY < 50;
+  const seite = (links: boolean): React.CSSProperties => (links ? { left: 10 } : { right: 10 });
+  const markeEcke: React.CSSProperties = seite(schleifeOben ? !schleifeLinks : schleifeLinks);
+  const countdownEcke: React.CSSProperties = seite(schleifeOben ? schleifeLinks : !schleifeLinks);
 
   const klick = (): void => {
     if (!offen || loest) {
@@ -108,15 +151,17 @@ export default function Tuerchen(props: ITuerchenProps): React.ReactElement<ITue
       <span className={styles.rahmen} aria-hidden="true" />
       {verpackt && (
         <span className={styles.geschenk} aria-hidden="true">
-          <span className={styles.bandSenkrecht} />
-          <span className={styles.bandWaagerecht} />
-          <Schleife />
+          {v.art !== 'waagerecht' && <span className={styles.bandSenkrecht} />}
+          {v.art !== 'senkrecht' && <span className={styles.bandWaagerecht} />}
+          {v.schleife === 'rosette' ? <Rosette /> : <KlassischeSchleife />}
         </span>
       )}
-      {heute && !geoeffnet && <span className={styles.heuteMarke}>Heute</span>}
-      <span className={styles.zahl}>{tag}</span>
-      {BESCHRIFTUNG[tag] && <span className={styles.beschriftung}>{BESCHRIFTUNG[tag]}</span>}
-      {!offen && <span className={styles.countdown}>{nochTage}</span>}
+      {heute && !geoeffnet && <span className={styles.heuteMarke} style={markeEcke}>Heute</span>}
+      <span className={styles.etikett}>
+        <span className={styles.zahl}>{tag}</span>
+        {BESCHRIFTUNG[tag] && <span className={styles.beschriftung}>{BESCHRIFTUNG[tag]}</span>}
+      </span>
+      {!offen && <span className={styles.countdown} style={countdownEcke}>{nochTage}</span>}
     </button>
   );
 }

@@ -17,7 +17,7 @@ import Adventskalender from './components/Adventskalender';
 import { IAdventskalenderProps } from './components/IAdventskalenderProps';
 import { AdventskalenderListe } from './logic/AdventskalenderListe';
 import { hoechsterOffenerTag } from './logic/freischaltung';
-import { DESIGNS, gueltigesDesign } from './logic/designs';
+import { Design, DESIGNS, gueltigesDesign } from './logic/designs';
 
 export interface IAdventskalenderWebPartProps {
   titel: string;
@@ -56,6 +56,12 @@ export default class AdventskalenderWebPart extends BaseClientSideWebPart<IAdven
         ladeInhalte: () => liste.laden(jahr, bisTag),
         ladeSchluessel: `${this._listenName()}|${jahr}|${bisTag}|${this._ladeZaehler}`,
         bearbeitungsModus: this.displayMode === DisplayMode.Edit,
+        onDesignAendern: (design: Design) => {
+          // Wird wie eine Änderung in den Einstellungen mit der Seite gespeichert.
+          this.properties.design = design;
+          this.context.propertyPane.refresh();
+          this.render();
+        },
         speicherSchluessel: `adventskalender-${this.context.instanceId}-${jahr}`
       }
     );

@@ -1,16 +1,9 @@
-// Adventskalender im Geschenk-Look. Drei Designs, umschaltbar in den Webpart-Einstellungen:
-// Winternacht (dunkel, Laternengold), IHK (Blau/Weiß, an die IHK-Farben angelehnt) und Klassisch (Rot/Grün/Gold auf Creme).
+// Adventskalender im Geschenk-Look. Drei Designs, umschaltbar direkt im Webpart (Bearbeitungsmodus) oder in den Einstellungen:
+// Winternacht (dunkel, Laternengold), IHK (IHK-Blau mit warmem Gold) und Klassisch (Rot/Grün/Gold auf Creme).
+// Jedes Türchen bekommt eine eigene Verpackung (siehe logic/verpackung.ts); Bandlage, Zahl und Schleife kommen als CSS-Variablen.
 // Ausgelegt für Desktop-Seiten; auf schmalen Flächen gibt es nur ein einfaches Ersatzraster.
 
 $serif: Georgia, 'Times New Roman', serif;
-
-// Muster für das Geschenkpapier, liegen über der Papierfarbe.
-$muster-streifen: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.07) 0 6px, transparent 6px 18px);
-$muster-punkte: radial-gradient(circle, rgba(255, 255, 255, 0.14) 1.5px, transparent 2px);
-$muster-karo: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 50%, transparent 50%),
-  linear-gradient(rgba(255, 255, 255, 0.06) 50%, transparent 50%);
-$muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transparent 1.5px),
-  radial-gradient(circle, rgba(255, 255, 255, 0.10) 1px, transparent 1.5px);
 
 // ---------- Designs ----------
 
@@ -21,35 +14,48 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
   --schnee: 0.35;
   --titel: #f7efe7;
   --akzent: #f3b66a;
-  --gedaempft: #c9bcc4;
+  --akzent-text: #2a1a10;
   --papier0: #6a2133, #3d1220;
   --papier1: #24493f, #14291f;
   --papier2: #26355c, #161e36;
   --papier3: #4a2b56, #2a1832;
   --papier-gross: #7a2236, #3d1220;
-  --band: #e9b866;
-  --band-dunkel: #b8863a;
+  --band0: #e9b866;
+  --band0-d: #b8863a;
+  --band1: #f4ece0;
+  --band1-d: #c9bba6;
+  --band2: #d9dde3;
+  --band2-d: #9aa2ad;
   --zahl: #fff3df;
   --rand: rgba(247, 239, 231, 0.10);
   --schatten: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
+// Warmes IHK-Design: tiefes IHK-Blau statt Weiß, dazu Gold, Creme und Rot wie Kerzenlicht.
 .ihk {
-  --hintergrund: linear-gradient(180deg, #ffffff, #eef3f9);
-  --schnee: 0;
-  --titel: #003c71;
-  --akzent: #0069b4;
-  --gedaempft: #d6e4f2;
-  --papier0: #0069b4, #00508c;
-  --papier1: #003c71, #002a52;
-  --papier2: #3d8fd1, #2673b3;
-  --papier3: #5b7086, #3f5368;
-  --papier-gross: #00508c, #002a52;
-  --band: #ffffff;
-  --band-dunkel: #c9d6e4;
-  --zahl: #ffffff;
-  --rand: rgba(0, 60, 113, 0.12);
-  --schatten: 0 6px 16px rgba(0, 40, 80, 0.18);
+  --hintergrund: radial-gradient(ellipse at 12% 0%, rgba(242, 177, 82, 0.22), transparent 55%),
+    radial-gradient(ellipse at 88% 100%, rgba(214, 96, 64, 0.16), transparent 50%),
+    linear-gradient(180deg, #0f2e57, #0a1f3d);
+  --schnee: 0.28;
+  --titel: #fbf1df;
+  --akzent: #f2b552;
+  --akzent-text: #1f1608;
+  --papier0: #0a6bb8, #054f8c;
+  --papier1: #f6ecd8, #e6d5b3;
+  --muster1: rgba(0, 80, 150, 0.16);
+  --zahl1: #0b3a6e;
+  --papier2: #1d4f86, #12355e;
+  --papier3: #c9733a, #9c5224;
+  --papier-gross: #0a6bb8, #0b3a6e;
+  --band0: #f2c46d;
+  --band0-d: #c4913a;
+  --band1: #fbf1df;
+  --band1-d: #d8c6a4;
+  --band2: #d2493f;
+  --band2-d: #a3302a;
+  --zahl: #fff6e6;
+  --rand: rgba(251, 241, 223, 0.12);
+  --schatten: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
 .klassisch {
@@ -58,14 +64,18 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
   --schnee: 0;
   --titel: #6e1420;
   --akzent: #9b2230;
-  --gedaempft: #f3e6cc;
+  --akzent-text: #fffaf0;
   --papier0: #b3202e, #861622;
   --papier1: #2e6b3f, #1f4d2c;
   --papier2: #8a6a24, #6b5018;
   --papier3: #7d1d3f, #5a132d;
   --papier-gross: #b3202e, #6e1420;
-  --band: #fff1c9;
-  --band-dunkel: #d6b86e;
+  --band0: #fff1c9;
+  --band0-d: #d6b86e;
+  --band1: #e2b04a;
+  --band1-d: #a87a22;
+  --band2: #eef0f2;
+  --band2-d: #aeb4bb;
   --zahl: #fffaf0;
   --rand: rgba(110, 20, 32, 0.15);
   --schatten: 0 6px 16px rgba(80, 40, 10, 0.22);
@@ -83,7 +93,7 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
   background: var(--hintergrund);
   color: var(--titel);
 
-  // Leiser Schneefall als Muster im Hintergrund (nur Winternacht).
+  // Leiser Schneefall als Muster im Hintergrund (Winternacht und IHK).
   &::before {
     content: '';
     position: absolute;
@@ -130,6 +140,58 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
   font-size: 0.8rem;
   color: var(--akzent);
   white-space: nowrap;
+}
+
+.kopfRechts {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+// Design-Umschalter im Kopf, nur im Bearbeitungsmodus sichtbar.
+.designWahl {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--rand);
+  border-radius: 999px;
+  background: rgba(127, 127, 127, 0.12);
+}
+
+.designKnopf {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 5px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--titel);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(127, 127, 127, 0.18);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--akzent);
+    outline-offset: 2px;
+  }
+}
+
+.designAktiv,
+.designAktiv:hover {
+  background: var(--akzent);
+  color: var(--akzent-text);
+}
+
+.designFarbe {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
 .redaktionsHinweis {
@@ -193,16 +255,36 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
   }
 }
 
-.farbe0 { background: $muster-streifen, linear-gradient(155deg, var(--papier0)); }
-.farbe1 { background: $muster-punkte 0 0 / 14px 14px, linear-gradient(155deg, var(--papier1)); }
-.farbe2 { background: $muster-karo 0 0 / 20px 20px, linear-gradient(155deg, var(--papier2)); }
-.farbe3 { background: $muster-sterne 0 0 / 26px 26px, linear-gradient(155deg, var(--papier3)); }
+// Papierfarbe (aus dem Platz) und Muster (aus der Verpackung) sind getrennt, so entstehen mehr Kombinationen.
+.farbe0 { --papier: var(--papier0); --muster: var(--muster0, rgba(255, 255, 255, 0.10)); --zahl-farbe: var(--zahl0, var(--zahl)); }
+.farbe1 { --papier: var(--papier1); --muster: var(--muster1, rgba(255, 255, 255, 0.12)); --zahl-farbe: var(--zahl1, var(--zahl)); }
+.farbe2 { --papier: var(--papier2); --muster: var(--muster2, rgba(255, 255, 255, 0.10)); --zahl-farbe: var(--zahl2, var(--zahl)); }
+.farbe3 { --papier: var(--papier3); --muster: var(--muster3, rgba(255, 255, 255, 0.12)); --zahl-farbe: var(--zahl3, var(--zahl)); }
+
+// Streifen, Punkte, Karo, Sterne, feine Linien
+.muster0 { background: repeating-linear-gradient(45deg, var(--muster) 0 6px, transparent 6px 18px), linear-gradient(155deg, var(--papier)); }
+.muster1 { background: radial-gradient(circle, var(--muster) 1.5px, transparent 2.5px) 0 0 / 14px 14px, linear-gradient(155deg, var(--papier)); }
+.muster2 {
+  background: linear-gradient(90deg, var(--muster) 50%, transparent 50%) 0 0 / 22px 22px,
+    linear-gradient(var(--muster) 50%, transparent 50%) 0 0 / 22px 22px, linear-gradient(155deg, var(--papier));
+}
+.muster3 {
+  background: radial-gradient(circle, var(--muster) 1.2px, transparent 2px) 0 0 / 26px 26px,
+    radial-gradient(circle, var(--muster) 1px, transparent 1.6px) 13px 13px / 26px 26px, linear-gradient(155deg, var(--papier));
+}
+.muster4 { background: repeating-linear-gradient(90deg, var(--muster) 0 2px, transparent 2px 11px), linear-gradient(155deg, var(--papier)); }
 
 .start,
 .finale {
-  background: $muster-sterne 0 0 / 30px 30px, radial-gradient(ellipse at 60% 60%, rgba(255, 255, 255, 0.12), transparent 65%),
-    linear-gradient(155deg, var(--papier-gross));
+  --zahl-farbe: var(--zahl);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.16) 1.2px, transparent 2px) 0 0 / 30px 30px,
+    radial-gradient(ellipse at 60% 60%, rgba(255, 255, 255, 0.12), transparent 65%), linear-gradient(155deg, var(--papier-gross));
 }
+
+// Bandfarben pro Türchen
+.band0 { --band: var(--band0); --band-dunkel: var(--band0-d); }
+.band1 { --band: var(--band1); --band-dunkel: var(--band1-d); }
+.band2 { --band: var(--band2); --band-dunkel: var(--band2-d); }
 
 // Innerer Rahmen, sichtbar sobald das Geschenk ausgepackt ist.
 .rahmen {
@@ -218,7 +300,7 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
   opacity: 1;
 }
 
-// Geschenkband: senkrecht und waagerecht, Kreuzung im linken oberen Drittel, damit die Zahl frei bleibt.
+// Geschenkband: Lage pro Türchen über --band-x und --band-y, die Zahl liegt auf der freien Seite.
 .geschenk {
   position: absolute;
   inset: 0;
@@ -236,31 +318,31 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
 .bandSenkrecht {
   top: 0;
   bottom: 0;
-  left: 22%;
+  left: var(--band-x);
   width: var(--b);
+  margin-left: calc(var(--b) / -2);
   transform-origin: top;
 }
 
 .bandWaagerecht {
   left: 0;
   right: 0;
-  top: 26%;
+  top: var(--band-y);
   height: var(--b);
+  margin-top: calc(var(--b) / -2);
   background: linear-gradient(180deg, var(--band-dunkel), var(--band) 30%, var(--band) 70%, var(--band-dunkel));
   transform-origin: left;
 }
 
 .schleife {
   position: absolute;
-  left: 22%;
-  top: 26%;
+  left: var(--band-x);
+  top: var(--band-y);
   width: clamp(40px, 6cqi, 84px);
   height: auto;
-  margin-left: calc(var(--b) / 2);
-  margin-top: calc(var(--b) / 2);
   fill: var(--band);
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
-  transform: translate(-50%, -55%);
+  transform: translate(-50%, -55%) rotate(var(--dreh));
   transform-origin: 50% 55%;
   transition: transform 500ms ease, opacity 500ms ease;
 }
@@ -273,18 +355,27 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
   fill: rgba(0, 0, 0, 0.18);
 }
 
+.rosette {
+  width: clamp(34px, 4.6cqi, 64px);
+}
+
 .start .schleife,
 .finale .schleife {
   width: clamp(64px, 9.5cqi, 130px);
 }
 
+.start .rosette,
+.finale .rosette {
+  width: clamp(54px, 7.5cqi, 104px);
+}
+
 // Hover: die Schleife wackelt.
 @keyframes wackeln {
-  0%, 100% { transform: translate(-50%, -55%) rotate(0deg); }
-  20% { transform: translate(-50%, -55%) rotate(-12deg); }
-  40% { transform: translate(-50%, -55%) rotate(10deg); }
-  60% { transform: translate(-50%, -55%) rotate(-6deg); }
-  80% { transform: translate(-50%, -55%) rotate(3deg); }
+  0%, 100% { transform: translate(-50%, -55%) rotate(var(--dreh)); }
+  20% { transform: translate(-50%, -55%) rotate(calc(var(--dreh) - 12deg)); }
+  40% { transform: translate(-50%, -55%) rotate(calc(var(--dreh) + 10deg)); }
+  60% { transform: translate(-50%, -55%) rotate(calc(var(--dreh) - 6deg)); }
+  80% { transform: translate(-50%, -55%) rotate(calc(var(--dreh) + 3deg)); }
 }
 
 .offen:hover {
@@ -300,7 +391,7 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
 .loest {
   .schleife {
     animation: none;
-    transform: translate(-50%, -140%) rotate(35deg) scale(1.3);
+    transform: translate(-50%, -140%) rotate(calc(var(--dreh) + 35deg)) scale(1.3);
     opacity: 0;
   }
 
@@ -334,13 +425,24 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
 
 // ---------- Zahl und Beschriftung ----------
 
+// Zahl und Beschriftung sitzen gemeinsam an --zahl-x / --zahl-y, gegenüber der Schleife.
+.etikett {
+  position: absolute;
+  left: var(--zahl-x);
+  top: var(--zahl-y);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transform: translate(-50%, -50%);
+  color: var(--zahl-farbe);
+  white-space: nowrap;
+}
+
 .zahl {
-  position: relative;
-  margin: 8% 0 0 12%;
   font-family: $serif;
   font-size: clamp(1.5rem, 3.2cqi, 2.6rem);
   line-height: 1;
-  color: var(--zahl);
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
@@ -362,31 +464,58 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
   font-size: clamp(1.8rem, 4cqi, 3.2rem);
 }
 
-.geoeffnet .zahl {
-  margin: 0;
-}
-
 .beschriftung {
-  position: relative;
-  margin-left: 12%;
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--zahl);
   opacity: 0.85;
 }
 
-.geoeffnet .beschriftung {
-  margin-left: 0;
+// Geschenkanhänger: die Zahl steht auf einem kleinen Kärtchen mit Loch.
+.mitAnhaenger .etikett {
+  padding: 5px 12px 6px 22px;
+  border-radius: 3px 6px 6px 3px;
+  background: linear-gradient(180deg, #fffaf0, #efe2c8);
+  color: #3a2a1c;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);
+  transform: translate(-50%, -50%) rotate(calc(var(--dreh) * -0.4));
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    margin-top: -3px;
+    border-radius: 50%;
+    background: rgba(58, 42, 28, 0.45);
+  }
+
+  .zahl {
+    font-size: clamp(1.2rem, 2.4cqi, 2rem);
+    text-shadow: none;
+  }
+}
+
+.mitAnhaenger.hoch .etikett .zahl,
+.mitAnhaenger.breit .etikett .zahl {
+  font-size: clamp(1.5rem, 3cqi, 2.4rem);
+}
+
+// Ausgepackt: Zahl in die Mitte.
+.geoeffnet .etikett {
+  left: 50%;
+  top: 50%;
 }
 
 .countdown {
   position: absolute;
-  right: 10px;
   bottom: 8px;
   padding: 1px 7px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.28);
+  background: rgba(0, 0, 0, 0.5);
   font-size: 0.7rem;
   color: #fff;
 }
@@ -404,12 +533,11 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
 
 .heuteMarke {
   position: absolute;
-  right: 10px;
   top: 10px;
   padding: 2px 8px;
   border-radius: 999px;
   background: var(--akzent);
-  color: #fff;
+  color: var(--akzent-text);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -428,8 +556,7 @@ $muster-sterne: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transpare
     pointer-events: none;
   }
 
-  .zahl,
-  .beschriftung {
+  .etikett {
     z-index: 1;
   }
 }

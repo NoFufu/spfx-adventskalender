@@ -5,7 +5,7 @@ import type { IAdventskalenderProps } from './IAdventskalenderProps';
 import type { ITuerchenInhalt } from '../logic/ITuerchenInhalt';
 import { adventsHinweis, istOffen, tageBisOffen } from '../logic/freischaltung';
 import { belegePlaetze, IBelegterPlatz } from '../logic/layout';
-import { Design, DIALOG_FARBEN, IDialogFarben } from '../logic/designs';
+import { Design, DESIGN_KNOEPFE, DIALOG_FARBEN, IDialogFarben } from '../logic/designs';
 import Tuerchen from './Tuerchen';
 
 // Dialog im Stil des gewählten Designs statt im Standard-Look.
@@ -64,7 +64,7 @@ function speichereGeoeffnete(schluessel: string, tage: number[]): void {
 }
 
 export default function Adventskalender(props: IAdventskalenderProps): React.ReactElement<IAdventskalenderProps> {
-  const { titel, jahr, gemischt, vorschau, speicherSchluessel, ladeInhalte, ladeSchluessel, bearbeitungsModus, design } = props;
+  const { titel, jahr, gemischt, vorschau, speicherSchluessel, ladeInhalte, ladeSchluessel, bearbeitungsModus, design, onDesignAendern } = props;
   const farben: IDialogFarben = DIALOG_FARBEN[design];
   const jetzt: Date = props.jetzt ?? new Date();
   const [offenerTag, setOffenerTag] = React.useState<number | undefined>(undefined);
@@ -117,7 +117,25 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
           {titel && <h2 className={styles.titel}>{titel}</h2>}
           <p className={styles.untertitel}>{adventsHinweis(jahr, jetzt)}</p>
         </div>
-        {vorschau && <span className={styles.vorschauHinweis}>Vorschau: alle Türchen offen</span>}
+        <div className={styles.kopfRechts}>
+          {vorschau && <span className={styles.vorschauHinweis}>Vorschau: alle Türchen offen</span>}
+          {bearbeitungsModus && onDesignAendern && (
+            <div className={styles.designWahl} role="group" aria-label="Design wählen">
+              {DESIGN_KNOEPFE.map(knopf => (
+                <button
+                  key={knopf.key}
+                  type="button"
+                  className={`${styles.designKnopf} ${knopf.key === design ? styles.designAktiv : ''}`}
+                  aria-pressed={knopf.key === design}
+                  onClick={() => onDesignAendern(knopf.key)}
+                >
+                  <span className={styles.designFarbe} style={{ background: knopf.farbe }} />
+                  {knopf.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </header>
       {bearbeitungsModus && fehler && (
         <p className={styles.redaktionsHinweis}>
@@ -133,6 +151,7 @@ export default function Adventskalender(props: IAdventskalenderProps): React.Rea
             heute={platz.tag === heutigerTag}
             geoeffnet={geoeffnete.indexOf(platz.tag) !== -1}
             tageBisOffen={tageBisOffen(platz.tag, jahr, jetzt)}
+            jahr={jahr}
             onOeffnen={oeffne}
           />
         ))}
